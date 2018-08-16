@@ -1,0 +1,15 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  group: one
+  person: one
+  role: MyString
+  start: 2018-08-14
+  end: 2018-08-14
+
+two:
+  group: two
+  person: two
+  role: MyString
+  start: 2018-08-14
+  end: 2018-08-14

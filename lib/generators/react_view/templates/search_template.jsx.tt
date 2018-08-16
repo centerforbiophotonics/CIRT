@@ -47,15 +47,9 @@ class <%= class_name %>Search extends React.Component {
   onSuggestionsFetchRequested(){
     clearTimeout(this.searchTimeout);
     this.searchTimeout = setTimeout(() => {  
-
-      fetch('/<%= plural_table_name %>/search',{
-        method: 'POST',
-        body: JSON.stringify({
-          search_text: this.state.search_text
-        }),
-        headers: this.headers,
-        credentials: 'same-origin'
-      }).then(res => res.json())
+      var url = new URL(window.location.origin+"/users/search");
+      url.searchParams.append("search_text", this.state.search_text);
+      fetch(url).then(res => res.json())
         .then((data) => {
             this.setState({
               results: data

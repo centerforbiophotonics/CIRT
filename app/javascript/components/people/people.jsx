@@ -2,27 +2,38 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
+import { CSVLink } from 'react-csv';
 
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faPen, faEye, faPlus, faArrowUp } from '@fortawesome/free-solid-svg-icons'
+import { faPen, faEye, faPlus, faArrowUp, faFileDownload } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-library.add( faPen, faEye, faPlus, faArrowUp )
+library.add( faPen, faEye, faPlus, faArrowUp, faFileDownload )
 
-import User from './user';
-import UserForm from './user_form';
-import UserSearch from './user_search';
+import Person from './person';
+import PersonForm from './person_form';
 
 /**
- * User interface for listing, filtering and exporting Users. Renders subcomponents for CRUD actions. Can be used a root component or rendered from the form or show component of an associated model. 
+ * User interface for listing, filtering and exporting People. Renders subcomponents for CRUD actions. Can be used a root component or rendered from the form or show component of an associated model. 
  */
-class Users extends React.Component {
+class People extends React.Component {
   static propTypes = {
-    /** A hash of user ids to objects containing their attributes and associated models' attributes. */
-    users: PropTypes.object,
-    /** An object with all attributes of the user who requested the page. The users roles array can be used for authorization. */
+    /** A hash of person ids to objects containing their attributes and associated models' attributes. */
+    people: PropTypes.object,
+    /** @type {object} The user who requested the page. The users roles array can be used for authorization. */
     current_user: PropTypes.object,
-    handleUpdate: PropTypes.func
-  }
+    /** @type {function} If this component is used by another to display its associations it can provide a handler which this component will call to update the parent state after it has changed. */
+    handleUpdate: PropTypes.func,
+    /** @type {string} The parent model name to be used if this component is nested within another to hide fields set by the parent (id fields). */
+    parent_model: PropTypes.string,
+    /** @type {object} The parent object these records belong to. */
+    parent: PropTypes.object,
+    /** @type {number} Passed to ReactTable to set the initial number of rows per page. */
+    defaultPageSize: PropTypes.number
+  };
+
+  static defaultProps = {
+    defaultPageSize: 10
+  };
 
   /** 
    * The constructor lifecycle method. 
@@ -41,10 +52,11 @@ class Users extends React.Component {
     this.columnDefs = this.columnDefs.bind(this);
     this.backToTop = this.backToTop.bind(this);
     this.copy = this.copy.bind(this);
+    this.setExport = this.setExport.bind(this);
 
     this.state = {
       /** @type {Object} A hash of the records to display */
-      users: this.copy(props.users),
+      people: this.copy(props.people),
       /** @type {Boolean} Whether the create menu is visible */
       adding: false,
       /** @type {Boolean} Whether the show view is visible */
@@ -52,7 +64,9 @@ class Users extends React.Component {
       /** @type {Boolean} Whether the edit menu is visible */
       editing: false,
       /** @type {Boolean} The record currently being displayed in either the show, add, or edit component. */
-      selected: null
+      selected: null,
+      /** @type {Array} The data that has been sorted and filtered by react table for export via CSVLink */
+      export_data: []
     };
   }
 
@@ -75,13 +89,17 @@ class Users extends React.Component {
 
   /** 
    * Handler invoked after a form succeeds in adding a new model instance to update the client state. 
-   * @param {object} user - The model instance to add to the current state.
+   * @param {object} person - The model instance to add to the current state.
    * @public
    */
-  add(user) {
+  add(person) {
     this.setState(function(prevState, props){
-      prevState.users[user.id] = user;
+      prevState.people[person.id] = person;
       prevState.adding = false;
+
+      prevState.editing = true;
+      prevState.selected = person;
+      
       return prevState;
     });
   }
@@ -106,12 +124,12 @@ class Users extends React.Component {
 
   /** 
    * Handler invoked after a form succeeds in editing a model instance to update the client state. 
-   * @param {object} user - The updated model instance replace in the current state.
+   * @param {object} person - The updated model instance replace in the current state.
    * @public
    */
-  update(user){
+  update(person){
     this.setState(function(prevState, props){
-      prevState.users[user.id] = user;
+      prevState.people[person.id] = person;
       prevState.selected = null;
       prevState.editing = false;
       return prevState;
@@ -138,12 +156,12 @@ class Users extends React.Component {
 
   /** 
    * Handler invoked after a form succeeds in deleting a model instance to update the client state. 
-   * @param {object} user - The deleted model instance remove from the current state.
+   * @param {object} person - The deleted model instance remove from the current state.
    * @public
    */
-  delete(user){
+  delete(person){
     this.setState(function(prevState, props){
-      delete prevState.users[user.id];
+      delete prevState.people[person.id];
       prevState.selected = null;
       prevState.editing = false;
       return prevState;
@@ -159,8 +177,13 @@ class Users extends React.Component {
     return [
       { Header: 'Name', accessor: 'name' },
       { Header: 'Email', accessor: 'email' },
+      { Header: 'Pidm', accessor: 'pidm' },
+      { Header: 'Sid', accessor: 'sid' },
+      { Header: 'Emp', accessor: 'emp_id' },
+      { Header: 'Iam', accessor: 'iam_id' },
       { Header: 'Cas User', accessor: 'cas_user' },
-      { Header: 'Roles', accessor: 'roles' },
+      { Header: 'Dems', accessor: 'dems_id' },
+      { Header: 'Cims', accessor: 'cims_id' },
       { 
         Header: 'Actions',
         Cell: d => {
@@ -195,6 +218,15 @@ class Users extends React.Component {
   copy(obj){
     return JSON.parse(JSON.stringify(obj));
   }
+
+  /**
+   * Sets a state attribute that contains the data as filtered and sorted by react table and is used by CSVLink to download a CSV export.
+   * @public
+   */
+  setExport(){
+    if (this.reactTable)
+      this.setState({export_data: this.reactTable.getResolvedState().sortedData.map((r)=> r._original)});
+  }
      
   /** 
    * The render lifecycle method.
@@ -204,46 +236,52 @@ class Users extends React.Component {
     let top_content = <a className="btn btn-secondary text-white mb-3" onClick={this.toggleAdd}><FontAwesomeIcon icon="plus"/></a>;
     
     if (this.state.adding){
-      top_content = <UserForm 
+      top_content = <PersonForm 
         action="create" 
         current_user={this.props.current_user}
         handleNew={this.add}
         handleFormToggle={this.toggleAdd}
       />
     } else if (this.state.editing){
-      top_content = <UserForm 
+      top_content = <PersonForm 
         action="update" 
-        user={this.state.selected} 
+        person={this.state.selected} 
         current_user={this.props.current_user}
         handleUpdate={this.update} 
         handleDelete={this.delete}
         handleFormToggle={this.toggleUpdate}
       />
     } else if (this.state.showing){
-      top_content = <User 
-        user={this.state.selected}
+      top_content = <Person 
+        person={this.state.selected}
         current_user={this.props.current_user}
         close={this.toggleShow}
       />
     }
 
     return (
-      <div className="users">
+      <div className="people col-md-12">
         <a className="btn btn-secondary text-white btn-sm" id="back-to-top" onClick={this.backToTop}><FontAwesomeIcon icon="arrow-up"/></a> 
         <div className="card">
           <h2 className="card-title text-center">
-            Users     
+            People     
           </h2>
 
           <div className="card-body">
             {top_content}
 
-            <UserSearch handleResultSelected={(data) => {console.log(data)}} />
+            <CSVLink data={this.state.export_data} className="btn btn-secondary text-white mb-3 ml-1">
+              <FontAwesomeIcon icon="file-download"/>
+            </CSVLink>
+
             <ReactTable
-              data={Object.values(this.state.users)}
+              data={Object.values(this.state.people)}
               columns={this.columnDefs()}
               filterable
-              defaultPageSize={10}
+              defaultPageSize={this.props.defaultPageSize}
+              ref={(r)=>this.reactTable=r}
+              onSortedChange={this.setExport}
+              onFilteredChange={this.setExport}
             />
           </div>
         </div>
@@ -265,6 +303,8 @@ class Users extends React.Component {
         document.getElementById("back-to-top").style.display = "none";
       }
     }
+
+    this.setExport();
   }
 
   /**
@@ -277,10 +317,10 @@ class Users extends React.Component {
    */
   componentWillReceiveProps(nextProps) {
     this.setState(prevState => {
-      prevState.user = this.copy(nextProps.user);
+      prevState.person = this.copy(nextProps.person);
       return prevState;
     })
   }
 }
 
-export default Users;
+export default People;

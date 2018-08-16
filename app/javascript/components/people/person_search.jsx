@@ -7,7 +7,7 @@ import Autosuggest from 'react-autosuggest';
  * and allows the user to select one which is passed back to a parent component via a prop function. 
  * Can be used to search for and select an associated record for a belongs_to or has_one association.
  */
-class UserSearch extends React.Component {
+class PersonSearch extends React.Component {
   static propTypes = {
     /** @type {function} A handler which is passed the search result selected by the user. */
     handleResultSelected: PropTypes.func
@@ -45,10 +45,9 @@ class UserSearch extends React.Component {
   }
 
   onSuggestionsFetchRequested(){
-    console.log("onSuggestionsFetchRequested")
     clearTimeout(this.searchTimeout);
     this.searchTimeout = setTimeout(() => {  
-      var url = new URL(window.location.origin+"/users/search");
+      var url = new URL(window.location.origin+"/people/search");
       url.searchParams.append("search_text", this.state.search_text);
       fetch(url).then(res => res.json())
         .then((data) => {
@@ -62,7 +61,6 @@ class UserSearch extends React.Component {
             });
           }
         )
-
     }, 500); 
   }
 
@@ -76,21 +74,21 @@ class UserSearch extends React.Component {
   renderSuggestion(suggestion){
     return (
       <div>
-        {suggestion.name}
+        {suggestion.name} ({suggestion.id})
       </div>
     );
   }
 
   render(){
     const inputProps = {
-      placeholder: 'Enter a User name',
+      placeholder: 'Enter a Person name',
       value: this.state.search_text,
       onChange: this.handleChange
     };
 
     return (
-      <div className="user-search">
-        <p className="small-indent">Search for an existing User</p>
+      <div className="person-search">
+        <p className="small-indent">Search for an existing Person</p>
         <Autosuggest
           suggestions={this.state.results}
           onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
@@ -105,4 +103,4 @@ class UserSearch extends React.Component {
   }
 }
 
-export default UserSearch;
+export default PersonSearch;

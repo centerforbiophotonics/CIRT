@@ -1,16 +1,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-class UserForm extends React.Component {
+class GroupForm extends React.Component {
   static propTypes = {
     /** @type {string} A string to indicate if the form is being used to update or create a model instance. Must be equal to "update" or "create". */
     action: PropTypes.string, 
     /** @type {string} The record to edit. If creating a new instance this prop is not required and the new instance will be created using defaults returned from the defaults method. */
-    user: PropTypes.object,
+    group: PropTypes.object,
     /** @type {object} The attributes of the user who requested the page. */
     current_user: PropTypes.object,
     /** @type {function} A handler to invoke after successfully updating or creating a record via AJAX. */
     handleUpdate: PropTypes.func,
+    /** @type {function} A handler to invoke after successfully creating a record via AJAX. */
+    handleNew: PropTypes.func,
     /** @type {function} A handler to invoke after successfully deleting a record via AJAX. */
     handleDelete: PropTypes.func,
     /** @type {function} A handler that hides/closes the form. */
@@ -33,7 +35,7 @@ class UserForm extends React.Component {
     this.copy = this.copy.bind(this);
 
     this.state = {
-      user: (this.props.user ? this.copy(this.props.user) : this.defaults())
+      group: (this.props.group ? this.copy(this.props.group) : this.defaults())
     }
 
     this.token = document.head.querySelector("[name=csrf-token]").content;
@@ -58,7 +60,7 @@ class UserForm extends React.Component {
     const value = e.target.value;
 
     this.setState(prevState => {
-      prevState.user[name] = value;
+      prevState.group[name] = value;
       return prevState;
     });
   }
@@ -71,7 +73,7 @@ class UserForm extends React.Component {
     if (e.isDefaultPrevented != null && e.isDefaultPrevented() == false)
       e.preventDefault();
     
-    fetch("/users/"+this.props.user.id, {
+    fetch("/groups/"+this.props.group.id, {
       method: 'DELETE',
       headers: this.headers,
       credentials: 'include'
@@ -94,7 +96,7 @@ class UserForm extends React.Component {
       e.preventDefault();
     
     if (this.props.action == "create"){
-      fetch('/users',{
+      fetch('/groups',{
         method: 'POST',
         body: JSON.stringify(this.state),
         headers: this.headers,
@@ -108,7 +110,7 @@ class UserForm extends React.Component {
           }
         )
     } else if (this.props.action == "update") {
-      fetch("/users/"+this.props.user.id,{
+      fetch("/groups/"+this.props.group.id,{
         method: 'PUT',
         body: JSON.stringify(this.state),
         headers: this.headers,
@@ -130,7 +132,7 @@ class UserForm extends React.Component {
    * @public
    */
   valid(){
-    let user = this.state.user;
+    let group = this.state.group;
     return true;
   }
 
@@ -142,9 +144,8 @@ class UserForm extends React.Component {
   defaults(){
     return {
       name: "",
-      email: "",
-      cas_user: "",
-      roles: ""
+      description: "",
+      group_category_id: ""
     }
   }
 
@@ -170,7 +171,7 @@ class UserForm extends React.Component {
    */
   render(){
 
-    let user = this.state.user;
+    let group = this.state.group;
 
     let button_text = null;
     if (this.props.action == "create"){
@@ -181,19 +182,20 @@ class UserForm extends React.Component {
 
     let title = null;
     if (this.props.action == "create"){
-      title = "Creating A New User";
+      title = "Creating A New Group";
     } else if (this.props.action == "update"){
-      title = "Editing "+user.name;
+      title = "Editing "+group.name;
     }
 
     let buttons = (
       <div className="form-actions">
         <a className="btn btn-danger text-white" onClick={this.handleSubmit} disabled={!this.valid()}>{button_text}</a>
-        {this.props.action == "update" ? 
+        {this.props.action === "update" &&
           <a className="btn btn-danger text-white ml-3" onClick={this.handleDelete} disabled={!this.valid()}>Delete</a>
-          : null
         }
-        <a className="btn btn-danger text-white ml-3" onClick={this.props.handleFormToggle}>Cancel</a>         
+        {this.props.handleFormToggle !== undefined && 
+          <a className="btn btn-danger text-white ml-3" onClick={this.props.handleFormToggle}>Cancel</a>         
+        }
       </div>
     )
 
@@ -205,26 +207,20 @@ class UserForm extends React.Component {
             {buttons}
             <div className="form-group">
               <label htmlFor="name" className="font-weight-bold">Name</label>
-              <input type="text" className="form-control" id="name" name="name" aria-describedby="name_help" value={user.name} placeholder="Enter Name" onChange={this.handleChange}/>
+              <input type="text" className="form-control" id="name" name="name" aria-describedby="name_help" value={group.name} placeholder="Enter Name" onChange={this.handleChange}/>
               <small id="name_help" className="form-text text-muted">Help text placeholder.</small>
             </div>
 
             <div className="form-group">
-              <label htmlFor="email" className="font-weight-bold">Email</label>
-              <input type="text" className="form-control" id="email" name="email" aria-describedby="email_help" value={user.email} placeholder="Enter Email" onChange={this.handleChange}/>
-              <small id="email_help" className="form-text text-muted">Help text placeholder.</small>
+              <label htmlFor="description" className="font-weight-bold">Description</label>
+              <input type="text" className="form-control" id="description" name="description" aria-describedby="description_help" value={group.description} placeholder="Enter Description" onChange={this.handleChange}/>
+              <small id="description_help" className="form-text text-muted">Help text placeholder.</small>
             </div>
 
             <div className="form-group">
-              <label htmlFor="cas_user" className="font-weight-bold">Cas User</label>
-              <input type="text" className="form-control" id="cas_user" name="cas_user" aria-describedby="cas_user_help" value={user.cas_user} placeholder="Enter Cas User" onChange={this.handleChange}/>
-              <small id="cas_user_help" className="form-text text-muted">Help text placeholder.</small>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="roles" className="font-weight-bold">Roles</label>
-              <input type="text" className="form-control" id="roles" name="roles" aria-describedby="roles_help" value={user.roles} placeholder="Enter Roles" onChange={this.handleChange}/>
-              <small id="roles_help" className="form-text text-muted">Help text placeholder.</small>
+              <label htmlFor="group_category_id" className="font-weight-bold">Group Category</label>
+              <input type="text" className="form-control" id="group_category_id" name="group_category_id" aria-describedby="group_category_id_help" value={group.group_category_id} placeholder="Enter Group Category" onChange={this.handleChange}/>
+              <small id="group_category_id_help" className="form-text text-muted">Help text placeholder.</small>
             </div>
 
             {buttons}
@@ -241,10 +237,10 @@ class UserForm extends React.Component {
    */
   componentWillReceiveProps(nextProps) {
     this.setState(prevState => {
-      prevState.user = (nextProps.user ? this.copy(nextProps.user) : this.defaults());
+      prevState.group = (nextProps.group ? this.copy(nextProps.group) : this.defaults());
       return prevState;
     })
   }
 }
 
-export default UserForm;
+export default GroupForm;

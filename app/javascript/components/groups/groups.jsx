@@ -8,17 +8,16 @@ import { faPen, faEye, faPlus, faArrowUp } from '@fortawesome/free-solid-svg-ico
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 library.add( faPen, faEye, faPlus, faArrowUp )
 
-import User from './user';
-import UserForm from './user_form';
-import UserSearch from './user_search';
+import Group from './group';
+import GroupForm from './group_form';
 
 /**
- * User interface for listing, filtering and exporting Users. Renders subcomponents for CRUD actions. Can be used a root component or rendered from the form or show component of an associated model. 
+ * User interface for listing, filtering and exporting Groups. Renders subcomponents for CRUD actions. Can be used a root component or rendered from the form or show component of an associated model. 
  */
-class Users extends React.Component {
+class Groups extends React.Component {
   static propTypes = {
-    /** A hash of user ids to objects containing their attributes and associated models' attributes. */
-    users: PropTypes.object,
+    /** A hash of group ids to objects containing their attributes and associated models' attributes. */
+    groups: PropTypes.object,
     /** An object with all attributes of the user who requested the page. The users roles array can be used for authorization. */
     current_user: PropTypes.object,
     handleUpdate: PropTypes.func
@@ -44,7 +43,7 @@ class Users extends React.Component {
 
     this.state = {
       /** @type {Object} A hash of the records to display */
-      users: this.copy(props.users),
+      groups: this.copy(props.groups),
       /** @type {Boolean} Whether the create menu is visible */
       adding: false,
       /** @type {Boolean} Whether the show view is visible */
@@ -75,12 +74,12 @@ class Users extends React.Component {
 
   /** 
    * Handler invoked after a form succeeds in adding a new model instance to update the client state. 
-   * @param {object} user - The model instance to add to the current state.
+   * @param {object} group - The model instance to add to the current state.
    * @public
    */
-  add(user) {
+  add(group) {
     this.setState(function(prevState, props){
-      prevState.users[user.id] = user;
+      prevState.groups[group.id] = group;
       prevState.adding = false;
       return prevState;
     });
@@ -106,12 +105,12 @@ class Users extends React.Component {
 
   /** 
    * Handler invoked after a form succeeds in editing a model instance to update the client state. 
-   * @param {object} user - The updated model instance replace in the current state.
+   * @param {object} group - The updated model instance replace in the current state.
    * @public
    */
-  update(user){
+  update(group){
     this.setState(function(prevState, props){
-      prevState.users[user.id] = user;
+      prevState.groups[group.id] = group;
       prevState.selected = null;
       prevState.editing = false;
       return prevState;
@@ -138,12 +137,12 @@ class Users extends React.Component {
 
   /** 
    * Handler invoked after a form succeeds in deleting a model instance to update the client state. 
-   * @param {object} user - The deleted model instance remove from the current state.
+   * @param {object} group - The deleted model instance remove from the current state.
    * @public
    */
-  delete(user){
+  delete(group){
     this.setState(function(prevState, props){
-      delete prevState.users[user.id];
+      delete prevState.groups[group.id];
       prevState.selected = null;
       prevState.editing = false;
       return prevState;
@@ -158,9 +157,8 @@ class Users extends React.Component {
   columnDefs(){
     return [
       { Header: 'Name', accessor: 'name' },
-      { Header: 'Email', accessor: 'email' },
-      { Header: 'Cas User', accessor: 'cas_user' },
-      { Header: 'Roles', accessor: 'roles' },
+      { Header: 'Description', accessor: 'description' },
+      { Header: 'Group Category', accessor: 'group_category_id' },
       { 
         Header: 'Actions',
         Cell: d => {
@@ -204,43 +202,42 @@ class Users extends React.Component {
     let top_content = <a className="btn btn-secondary text-white mb-3" onClick={this.toggleAdd}><FontAwesomeIcon icon="plus"/></a>;
     
     if (this.state.adding){
-      top_content = <UserForm 
+      top_content = <GroupForm 
         action="create" 
         current_user={this.props.current_user}
         handleNew={this.add}
         handleFormToggle={this.toggleAdd}
       />
     } else if (this.state.editing){
-      top_content = <UserForm 
+      top_content = <GroupForm 
         action="update" 
-        user={this.state.selected} 
+        group={this.state.selected} 
         current_user={this.props.current_user}
         handleUpdate={this.update} 
         handleDelete={this.delete}
         handleFormToggle={this.toggleUpdate}
       />
     } else if (this.state.showing){
-      top_content = <User 
-        user={this.state.selected}
+      top_content = <Group 
+        group={this.state.selected}
         current_user={this.props.current_user}
         close={this.toggleShow}
       />
     }
 
     return (
-      <div className="users">
+      <div className="groups">
         <a className="btn btn-secondary text-white btn-sm" id="back-to-top" onClick={this.backToTop}><FontAwesomeIcon icon="arrow-up"/></a> 
         <div className="card">
           <h2 className="card-title text-center">
-            Users     
+            Groups     
           </h2>
 
           <div className="card-body">
             {top_content}
 
-            <UserSearch handleResultSelected={(data) => {console.log(data)}} />
             <ReactTable
-              data={Object.values(this.state.users)}
+              data={Object.values(this.state.groups)}
               columns={this.columnDefs()}
               filterable
               defaultPageSize={10}
@@ -277,10 +274,10 @@ class Users extends React.Component {
    */
   componentWillReceiveProps(nextProps) {
     this.setState(prevState => {
-      prevState.user = this.copy(nextProps.user);
+      prevState.group = this.copy(nextProps.group);
       return prevState;
     })
   }
 }
 
-export default Users;
+export default Groups;

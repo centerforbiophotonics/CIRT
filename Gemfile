@@ -65,3 +65,6 @@ gem 'webpacker'
 gem 'webpacker-react'
 gem 'rubycas-client-rails', git: 'https://github.com/centerforbiophotonics/rubycas-client-rails.git'
 gem 'pundit'
+
+gem 'textacular', '~> 5.0'
+gem 'pg'
