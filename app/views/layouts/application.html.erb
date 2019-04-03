@@ -15,6 +15,41 @@
   </head>
 
   <body>
-    <%= yield %>
+    <ul class="nav justify-content-center">
+      <li class="nav-item">
+        <a class="nav-link" href="<%= people_path%>">People</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="<%= person_groups_path%>">Person Group Associations</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="<%= roles_path%>">Roles</a>
+      </li
+      <li class="nav-item">
+        <a class="nav-link" href="<%= person_events_path%>">Person Event Associations</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="<%= person_funds_path%>">Person Fund Associations</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="<%= groups_path%>">Groups</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="<%= group_categories_path%>">Group Categories</a>
+      </li> 
+      <li class="nav-item">
+        <a class="nav-link" href="<%= events_path%>">Events</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="<%= event_categories_path%>">Event Categories</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="<%= funds_path%>">Funds</a>
+      </li>
+    </ul>
+
+    <div class="col-md-10 offset-md-1" id="root">
+      <%= yield %>
+    </div>
   </body>
 </html>

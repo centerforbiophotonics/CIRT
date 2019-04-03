@@ -15,7 +15,11 @@ class UserForm extends React.Component {
     handleDelete: PropTypes.func,
     /** @type {function} A handler that hides/closes the form. */
     handleFormToggle: PropTypes.func
-  }
+  };
+
+  static defaultProps = {
+    user: {}
+  };
 
   /** 
    * The constructor lifecycle method. 

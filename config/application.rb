@@ -14,6 +14,8 @@ module CIRT
     config.rubycas.cas_base_url = "https://ssodev.ucdavis.edu/cas/"
     config.rubycas.cas_service_url = "https://localhost:3000/"
 
+    config.autoload_paths += %W(#{config.root}/lib)
+
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration can go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded after loading

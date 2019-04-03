@@ -83,7 +83,8 @@ class GroupSearch extends React.Component {
     const inputProps = {
       placeholder: 'Enter a Group name',
       value: this.state.search_text,
-      onChange: this.handleChange
+      onChange: this.handleChange,
+      onFocus: this.onSuggestionsFetchRequested
     };
 
     return (
@@ -97,6 +98,8 @@ class GroupSearch extends React.Component {
           onSuggestionSelected={(e, d) => {this.props.handleResultSelected(d.suggestion)}}
           renderSuggestion={this.renderSuggestion}
           inputProps={inputProps}
+          alwaysRenderSuggestions={true}
+
         />
       </div>
     );

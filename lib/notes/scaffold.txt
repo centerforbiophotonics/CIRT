@@ -1,15 +1,42 @@
 rails g model Person name:string email:string pidm:integer sid:integer emp_id:integer iam_id:integer cas_user:string dems_id:integer cims_id:integer
 rails g react_view Person name:string email:string pidm:integer sid:integer emp_id:integer iam_id:integer cas_user:string dems_id:integer cims_id:integer
 
-rails g model Group name:string description:string category:string
+rails g model GroupCategory name:string description:string
+rails g react_view GroupCategory name:string description:string
+
+rails g model Group name:string description:string group_category:belongs_to
 rails g react_view Group name:string description:string group_category:belongs_to
 
 rails g model PersonGroup group:belongs_to person:belongs_to role:string start:date end:date
 rails g react_view PersonGroup group:belongs_to person:belongs_to role:string start:date end:date
 
 
-rails g model GroupCategory name:string description:string
-rails g react_view GroupCategory name:string description:string
+rails g model Fund amount:integer name:string description:string date:date external:boolean source:string
+rails g react_view Fund amount:integer name:string description:string date:date external:boolean source:string
 
-rails g model Money name:string description:string date:date external:boolean source:string
-rails g react_view Money name:string description:string date:date external:boolean source:string
+rails g model PersonFund person:belongs_to fund:belongs_to
+rails g react_view PersonFund person:belongs_to fund:belongs_to
+
+
+
+rails g model EventCategory name:string description:string
+rails g react_view EventCategory name:string description:string
+
+rails g model Event name:string description:string date:date event_category:references
+rails g react_view Event name:string description:string date:date event_category:references tags:string
+
+rails g model PersonEvent person:belongs_to event:belongs_to status:string
+rails g react_view PersonEvent person:belongs_to event:belongs_to status:string
+
+rails g model Role name:string variants:string
+rails g react_view Role name:string variants:string
+
+rails g model ConsultationCategory name:string description:string
+rails g react_view ConsultationCategory name:string description:string
+
+rails g model Consultation description:string date:string consultants:string minutes:integer consultation_category:references
+rails g react_view Consultation description:string date:date consultant:integer minutes:integer consultation_category:references
+
+rails g model PersonConsultation person:belongs_to consultation:belongs_to
+rails g react_view PersonConsultation person:belongs_to consultation:belongs_to
+

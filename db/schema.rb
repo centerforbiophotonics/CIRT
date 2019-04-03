@@ -10,11 +10,47 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_08_14_212804) do
+ActiveRecord::Schema.define(version: 2019_02_06_200820) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_trgm"
   enable_extension "plpgsql"
+
+  create_table "event_categories", force: :cascade do |t|
+    t.string "name"
+    t.string "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "events", force: :cascade do |t|
+    t.string "name"
+    t.string "description"
+    t.date "date"
+    t.bigint "event_category_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "tags"
+    t.index ["event_category_id"], name: "index_events_on_event_category_id"
+  end
+
+  create_table "funds", force: :cascade do |t|
+    t.integer "amount"
+    t.string "name"
+    t.string "description"
+    t.date "date"
+    t.boolean "external"
+    t.string "source"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "group_categories", force: :cascade do |t|
+    t.string "name"
+    t.string "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
 
   create_table "groups", force: :cascade do |t|
     t.string "name"
@@ -22,6 +58,8 @@ ActiveRecord::Schema.define(version: 2018_08_14_212804) do
     t.bigint "group_category_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "ancestry"
+    t.index ["ancestry"], name: "index_groups_on_ancestry"
     t.index ["group_category_id"], name: "index_groups_on_group_category_id"
     t.index ["name"], name: "index_groups_on_name", unique: true
   end
@@ -38,14 +76,28 @@ ActiveRecord::Schema.define(version: 2018_08_14_212804) do
     t.integer "cims_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["cas_user"], name: "index_people_on_cas_user", unique: true, where: "((email)::text <> ''::text)"
-    t.index ["cims_id"], name: "index_people_on_cims_id", unique: true, where: "((email)::text <> ''::text)"
-    t.index ["dems_id"], name: "index_people_on_dems_id", unique: true, where: "((email)::text <> ''::text)"
-    t.index ["email"], name: "index_people_on_email", unique: true, where: "((email)::text <> ''::text)"
-    t.index ["emp_id"], name: "index_people_on_emp_id", unique: true, where: "((email)::text <> ''::text)"
-    t.index ["iam_id"], name: "index_people_on_iam_id", unique: true, where: "((email)::text <> ''::text)"
-    t.index ["pidm"], name: "index_people_on_pidm", unique: true, where: "((email)::text <> ''::text)"
-    t.index ["sid"], name: "index_people_on_sid", unique: true, where: "((email)::text <> ''::text)"
+    t.integer "lms_id"
+    t.string "additional_emails"
+    t.boolean "do_not_contact", default: false
+  end
+
+  create_table "person_events", force: :cascade do |t|
+    t.bigint "person_id"
+    t.bigint "event_id"
+    t.string "status"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["event_id"], name: "index_person_events_on_event_id"
+    t.index ["person_id"], name: "index_person_events_on_person_id"
+  end
+
+  create_table "person_funds", force: :cascade do |t|
+    t.bigint "person_id"
+    t.bigint "fund_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["fund_id"], name: "index_person_funds_on_fund_id"
+    t.index ["person_id"], name: "index_person_funds_on_person_id"
   end
 
   create_table "person_groups", force: :cascade do |t|
@@ -60,6 +112,14 @@ ActiveRecord::Schema.define(version: 2018_08_14_212804) do
     t.index ["person_id"], name: "index_person_groups_on_person_id"
   end
 
+  create_table "roles", force: :cascade do |t|
+    t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "ancestry"
+    t.index ["ancestry"], name: "index_roles_on_ancestry"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "name"
     t.string "email"
@@ -69,6 +129,12 @@ ActiveRecord::Schema.define(version: 2018_08_14_212804) do
     t.datetime "updated_at", null: false
   end
 
+  add_foreign_key "events", "event_categories"
+  add_foreign_key "groups", "group_categories"
+  add_foreign_key "person_events", "events"
+  add_foreign_key "person_events", "people"
+  add_foreign_key "person_funds", "funds"
+  add_foreign_key "person_funds", "people"
   add_foreign_key "person_groups", "groups"
   add_foreign_key "person_groups", "people"
 end

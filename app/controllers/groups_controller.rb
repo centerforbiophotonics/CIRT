@@ -3,10 +3,10 @@ class GroupsController < ApplicationController
 
   # GET /groups
   def index
-    @groups = Group.all.map{|m| [m.id, m] }.to_h
+    @groups = Group.order(:name).all.map{|m| [m.id, m.with_associations] }.to_h
     respond_to do |format|
       format.html { render :action => "index" }
-      format.json { render :json => @groupsx}
+      format.json { render :json => @groups }
     end
   end
 
@@ -15,7 +15,7 @@ class GroupsController < ApplicationController
     @group = Group.new(group_params)
 
     if @group.save
-      render :json => @group
+      render :json => @group.with_associations
     else
       render json: @group.errors, status: :unprocessable_entity
     end
@@ -24,7 +24,7 @@ class GroupsController < ApplicationController
   # PATCH/PUT /groups/1
   def update
     if @group.update(group_params)
-      render json: @group
+      render json: @group.with_associations
     else
       render json: @group.errors, status: :unprocessable_entity
     end
@@ -37,7 +37,12 @@ class GroupsController < ApplicationController
 
   # GET /groups/search
   def search
-    render json: Group.fuzzy_search(:name => params[:search_text]).limit(10)
+    if params[:search_text] != ""
+      ActiveRecord::Base.connection.execute("SELECT set_limit(0.20);")
+      render json: Group.fuzzy_search(:name => params[:search_text]).limit(10)
+    else
+      render json: Group.order("created_at DESC").limit(10)
+    end
   end
 
   private

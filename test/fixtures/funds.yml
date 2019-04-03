@@ -1,0 +1,19 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  person: one
+  amount: 1
+  name: MyString
+  description: MyString
+  date: 2018-08-15
+  external: false
+  source: MyString
+
+two:
+  person: two
+  amount: 1
+  name: MyString
+  description: MyString
+  date: 2018-08-15
+  external: false
+  source: MyString

@@ -1,8 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import PersonGroupForm from './person_group_form';
-
 /**
  * Bootstrap card showing all the details of a person_group and its associated models.
  */

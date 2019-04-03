@@ -5,9 +5,9 @@ import 'react-table/react-table.css';
 import { CSVLink } from 'react-csv';
 
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faPen, faEye, faPlus, faArrowUp, faFileDownload } from '@fortawesome/free-solid-svg-icons'
+import { faPen, faEye, faPlus, faArrowUp, faFileImport, faFileExport } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-library.add( faPen, faEye, faPlus, faArrowUp, faFileDownload )
+library.add( faPen, faEye, faPlus, faArrowUp, faFileImport, faFileExport )
 
 import <%= class_name %> from './<%= singular_table_name %>';
 import <%= class_name %>Form from './<%= singular_table_name %>_form';
@@ -32,7 +32,7 @@ class <%= controller_class_name %> extends React.Component {
   };
 
   static defaultProps = {
-    defaultPageSize: 10
+    defaultPageSize: 100
   };
 
   /** 
@@ -66,7 +66,11 @@ class <%= controller_class_name %> extends React.Component {
       /** @type {Boolean} The record currently being displayed in either the show, add, or edit component. */
       selected: null,
       /** @type {Array} The data that has been sorted and filtered by react table for export via CSVLink */
-      export_data: []
+      export_data: [],
+      /** @type {String} A message that will be shown to the user. */
+      status_message: "",
+      /** @type {String} The type of. Uses bootstrap alert types. */
+      status_message_type: "info"
     };
   }
 
@@ -96,6 +100,12 @@ class <%= controller_class_name %> extends React.Component {
     this.setState(function(prevState, props){
       prevState.<%= plural_table_name %>[<%= singular_table_name %>.id] = <%= singular_table_name %>;
       prevState.adding = false;
+
+      prevState.editing = true;
+      prevState.selected = <%= singular_table_name %>;
+
+      prevState.status_message = "<%= singular_table_name %>"+<%= singular_table_name %>.id+" created.";
+      prevState.status_message_type = "success";
       return prevState;
     });
   }
@@ -126,8 +136,10 @@ class <%= controller_class_name %> extends React.Component {
   update(<%= singular_table_name %>){
     this.setState(function(prevState, props){
       prevState.<%= plural_table_name %>[<%= singular_table_name %>.id] = <%= singular_table_name %>;
-      prevState.selected = null;
-      prevState.editing = false;
+ 
+      prevState.status_message = "<%= singular_table_name %>"+<%= singular_table_name %>.id+" updated.";
+      prevState.status_message_type = "success";
+
       return prevState;
     });
   }
@@ -160,6 +172,10 @@ class <%= controller_class_name %> extends React.Component {
       delete prevState.<%= plural_table_name %>[<%= singular_table_name %>.id];
       prevState.selected = null;
       prevState.editing = false;
+
+      prevState.status_message = "<%= singular_table_name %>"+<%= singular_table_name %>.id+" deleted.";
+      prevState.status_message_type = "success";
+
       return prevState;
     });
   }
@@ -185,7 +201,8 @@ class <%= controller_class_name %> extends React.Component {
         className: "text-center",
         sortable: false,
         resizable: false,
-        filterable: false
+        filterable: false,
+        width: 80
       }
     ];
   }
@@ -227,6 +244,7 @@ class <%= controller_class_name %> extends React.Component {
       top_content = <<%= class_name %>Form 
         action="create" 
         current_user={this.props.current_user}
+        parent_model={this.props.parent_model}
         handleNew={this.add}
         handleFormToggle={this.toggleAdd}
       />
@@ -235,6 +253,7 @@ class <%= controller_class_name %> extends React.Component {
         action="update" 
         <%= singular_table_name %>={this.state.selected} 
         current_user={this.props.current_user}
+        parent_model={this.props.parent_model}
         handleUpdate={this.update} 
         handleDelete={this.delete}
         handleFormToggle={this.toggleUpdate}
@@ -255,11 +274,23 @@ class <%= controller_class_name %> extends React.Component {
             <%= controller_class_name %>     
           </h2>
 
+          {this.state.status_message != "" &&
+
+            <div className={"alert alert-"+this.state.status_message_type+" alert-dismissible mx-5"} role={this.state.status_message_type}>
+              <button type="button" className="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h3>{this.state.status_message}</h3>
+            </div>
+          }
+
           <div className="card-body">
             {top_content}
 
-            <CSVLink data={this.state.export_data} className="btn btn-secondary text-white mb-3 ml-1">
-              <FontAwesomeIcon icon="file-download"/>
+            <CSVLink 
+              data={this.state.export_data} 
+              className="btn btn-secondary text-white mb-3 ml-1"
+              filename="<%= plural_table_name %>_export.csv"
+            >
+              <FontAwesomeIcon icon="file-export"/>
             </CSVLink>
 
             <ReactTable

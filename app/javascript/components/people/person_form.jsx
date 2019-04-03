@@ -1,8 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import PersonGroupForm from '../person_groups/person_group_form';
 import PersonGroups from '../person_groups/person_groups';
+import PersonFunds from '../person_funds/person_funds';
+import PersonEvents from '../person_events/person_events';
 
 class PersonForm extends React.Component {
   static propTypes = {
@@ -18,7 +19,11 @@ class PersonForm extends React.Component {
     handleDelete: PropTypes.func,
     /** @type {function} A handler that hides/closes the form. */
     handleFormToggle: PropTypes.func
-  }
+  };
+
+  static defaultProps = {
+    person: {}
+  };
 
   /** 
    * The constructor lifecycle method. 
@@ -31,13 +36,14 @@ class PersonForm extends React.Component {
     this.handleChange = this.handleChange.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleIAMLookup = this.handleIAMLookup.bind(this);
     this.valid = this.valid.bind(this);
     this.defaults = this.defaults.bind(this);
     this.copy = this.copy.bind(this);
 
     this.state = {
       person: (this.props.person ? this.copy(this.props.person) : this.defaults()),
-
+      iam_changes_pending: false
     }
 
     this.token = document.head.querySelector("[name=csrf-token]").content;
@@ -46,7 +52,7 @@ class PersonForm extends React.Component {
       'Accept': 'application/json',
       'X-Requested-With': 'XMLHttpRequest',
       'X-CSRF-Token': this.token
-    };
+    }
 
   }
 
@@ -75,18 +81,19 @@ class PersonForm extends React.Component {
     if (e.isDefaultPrevented != null && e.isDefaultPrevented() == false)
       e.preventDefault();
     
-    fetch("/people/"+this.props.person.id, {
-      method: 'DELETE',
-      headers: this.headers,
-      credentials: 'include'
-    }).then(res => res.json())
-      .then(this.props.handleDelete,
-        (error) => {
-          this.setState({
-            error:error 
-          });
-        }
-      )
+    if (confirm("Are you sure you want to delete this person?"))
+      fetch("/people/"+this.props.person.id, {
+        method: 'DELETE',
+        headers: this.headers,
+        credentials: 'include'
+      }).then(res => res.json())
+        .then(this.props.handleDelete,
+          (error) => {
+            this.setState({
+              error:error 
+            });
+          }
+        );
   }
 
   /** 
@@ -130,6 +137,31 @@ class PersonForm extends React.Component {
     } 
   }
 
+  handleIAMLookup(e){
+    if (e.isDefaultPrevented != null && e.isDefaultPrevented() == false)
+      e.preventDefault();
+
+      fetch("/people/"+this.props.person.id+"/iam_lookup",{
+        method: 'GET',
+        headers: this.headers,
+        credentials: 'same-origin'
+      }).then(res => res.json())
+        .then((res) => {
+            this.setState(
+              {iam_changes_pending:true }, 
+              () => {this.props.handleUpdate(res)}
+            );
+
+          },
+          (error) => {
+            this.setState({
+              error:error 
+            });
+          }
+        )
+
+  }
+
   /**
    * A function that indicates if the form is in a valid state to be submitted to the server.
    * @return {boolean} Is the form in a valid state?
@@ -155,7 +187,8 @@ class PersonForm extends React.Component {
       iam_id: "",
       cas_user: "",
       dems_id: "",
-      cims_id: ""
+      cims_id: "",
+      lms_id: ""
     }
   }
 
@@ -184,26 +217,22 @@ class PersonForm extends React.Component {
     let person = this.state.person;
     let action = this.props.action;
 
-    let button_text = null;
-    if (action == "create"){
-      button_text = "Create";
-    } else if (action == "update"){
-      button_text = "Update";
-    } 
-
-    let title = null;
-    if (action == "create"){
-      title = "Creating A New Person";
-    } else if (action == "update"){
-      title = "Editing "+person.name;
-    }
 
     let buttons = (
-      <div className="form-actions">
-        <button type="button" className="btn btn-danger text-white" onClick={this.handleSubmit} disabled={!this.valid()}>{button_text}</button>
-        {action == "update" ? 
-          <button type="button" className="btn btn-danger text-white ml-3" onClick={this.handleDelete} disabled={!this.valid()}>Delete</button>
-          : null
+      <div className="form-actions mt-3">
+        <button type="button" className="btn btn-danger text-white" onClick={this.handleSubmit} disabled={!this.valid()}>
+          {
+            action === "create" ? "Create"
+            : action === "update" ? "Update"
+            : null
+          }
+        </button>
+
+        {action == "update" &&
+          <button type="button" className="btn btn-danger text-white ml-3" onClick={this.handleDelete}>Delete</button>
+        }
+        {(action == "update" && (person.cas_user !== "" || person.email !== "")) &&
+          <button type="button" className="btn btn-danger text-white ml-3" onClick={this.handleIAMLookup}>Lookup in IAM</button>
         }
         <button type="button" className="btn btn-danger text-white ml-3" onClick={this.props.handleFormToggle}>Cancel</button>         
       </div>
@@ -212,84 +241,127 @@ class PersonForm extends React.Component {
     return (
       <div className="card mb-3">
         <div className="card-body">
-          <h3 className="card-title">{title}</h3>
+          <h3 className="card-title">
+            {
+              this.props.action === "create" ?  "Creating a New Person"
+              : this.props.action === "update" ? "Editing "+person.name
+              : null
+            }
+          </h3>
           <div>
             {buttons}
-            <div className="row">
-              <div className="col-md-5">
-                <div className="form-group">
+            <div className="mt-3">
+              <div className="row">
+                <div className="form-group col-md-6">
                   <label htmlFor="name" className="font-weight-bold">Name</label>
-                  <input type="text" className="form-control" id="name" name="name" aria-describedby="name_help" value={person.name} placeholder="Enter Name" onChange={this.handleChange}/>
+                  <input type="text" className="form-control" id="name" name="name" value={person.name} placeholder="Enter Name" onChange={this.handleChange}/>
                 </div>
 
-                <div className="form-group">
+                <div className="form-group col-md-6">
                   <label htmlFor="email" className="font-weight-bold">Email</label>
-                  <input type="text" className="form-control" id="email" name="email" aria-describedby="email_help" value={person.email} placeholder="Enter Email" onChange={this.handleChange}/>
+                  <input type="text" className="form-control" id="email" name="email" value={person.email} placeholder="Enter Email" onChange={this.handleChange}/>
                 </div>
-
-                <a className="btn btn-primary m-1" data-toggle="collapse" href="#ids" role="button" aria-expanded="false" aria-controls="ids">
+              </div>
+              
+              <div className="row justify-content-center">
+                <a className="btn btn-primary mb-1" data-toggle="collapse" href="#ids" role="button" aria-expanded="false" aria-controls="ids">
                   Toggle IDs (Edit Carefully)
                 </a>
-                
-                <div className="collapse row m-1" id="ids">
-                  <div className="col-md-4">
-                    <div className="form-group">
-                      <label htmlFor="pidm" className="font-weight-bold">PIDM</label>
-                      <input type="text" className="form-control" id="pidm" name="pidm" aria-describedby="pidm_help" value={person.pidm} placeholder="Enter Pidm" onChange={this.handleChange}/>
-                    </div>
+              </div>
 
-                    <div className="form-group">
-                      <label htmlFor="sid" className="font-weight-bold">SID</label>
-                      <input type="text" className="form-control" id="sid" name="sid" aria-describedby="sid_help" value={person.sid} placeholder="Enter Sid" onChange={this.handleChange}/>
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="emp_id" className="font-weight-bold">Employee ID</label>
-                      <input type="text" className="form-control" id="emp_id" name="emp_id" aria-describedby="emp_id_help" value={person.emp_id} placeholder="Enter Emp" onChange={this.handleChange}/>
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="iam_id" className="font-weight-bold">IAM ID</label>
-                      <input type="text" className="form-control" id="iam_id" name="iam_id" aria-describedby="iam_id_help" value={person.iam_id} placeholder="Enter Iam" onChange={this.handleChange}/>
-                    </div>
+              <div className="collapse row" id="ids">
+                <div className="col-md-3">
+                  <div className="form-group">
+                    <label htmlFor="pidm" className="font-weight-bold">PIDM</label>
+                    <input type="text" className="form-control" id="pidm" name="pidm" value={person.pidm} placeholder="Enter PIDM" onChange={this.handleChange}/>
                   </div>
 
-                  <div className="col-md-4">
+                  <div className="form-group">
+                    <label htmlFor="sid" className="font-weight-bold">SID</label>
+                    <input type="text" className="form-control" id="sid" name="sid" value={person.sid} placeholder="Enter SID" onChange={this.handleChange}/>
+                  </div>
+                </div>
 
-                    <div className="form-group">
-                      <label htmlFor="cas_user" className="font-weight-bold">Kerberos User Name</label>
-                      <input type="text" className="form-control" id="cas_user" name="cas_user" aria-describedby="cas_user_help" value={person.cas_user} placeholder="Enter Cas User" onChange={this.handleChange}/>
-                    </div>
+                <div className="col-md-3">
+                  <div className="form-group">
+                    <label htmlFor="emp_id" className="font-weight-bold">Employee ID</label>
+                    <input type="text" className="form-control" id="emp_id" name="emp_id" value={person.emp_id} placeholder="Enter Employee ID" onChange={this.handleChange}/>
+                  </div>
 
-                    <div className="form-group">
-                      <label htmlFor="dems_id" className="font-weight-bold">DEMS ID</label>
-                      <input type="text" className="form-control" id="dems_id" name="dems_id" aria-describedby="dems_id_help" value={person.dems_id} placeholder="Enter Dems" onChange={this.handleChange}/>
-                    </div>
+                  <div className="form-group">
+                    <label htmlFor="iam_id" className="font-weight-bold">IAM ID</label>
+                    <input type="text" className="form-control" id="iam_id" name="iam_id" value={person.iam_id} placeholder="Enter IAM ID" onChange={this.handleChange}/>
+                  </div>
+                </div>
 
-                    <div className="form-group">
-                      <label htmlFor="cims_id" className="font-weight-bold">CIMS ID</label>
-                      <input type="text" className="form-control" id="cims_id" name="cims_id" aria-describedby="cims_id_help" value={person.cims_id} placeholder="Enter Cims" onChange={this.handleChange}/>
-                    </div>
+                <div className="col-md-3">
+                   <div className="form-group">
+                    <label htmlFor="cas_user" className="font-weight-bold">Kerberos User Name</label>
+                    <input type="text" className="form-control" id="cas_user" name="cas_user" value={person.cas_user} placeholder="Enter CAS User Name" onChange={this.handleChange}/>
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="dems_id" className="font-weight-bold">DEMS ID</label>
+                    <input type="text" className="form-control" id="dems_id" name="dems_id" value={person.dems_id} placeholder="Enter DEMS ID" onChange={this.handleChange}/>
+                  </div>
+                </div>
+
+                <div className="col-md-3">
+                  <div className="form-group">
+                    <label htmlFor="cims_id" className="font-weight-bold">CIMS ID</label>
+                    <input type="text" className="form-control" id="cims_id" name="cims_id" value={person.cims_id} placeholder="Enter CIMS ID" onChange={this.handleChange}/>
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="lms_id" className="font-weight-bold">LMS ID</label>
+                    <input type="text" className="form-control" id="lms_id" name="lms_id" value={person.lms_id} placeholder="Enter LMS ID" onChange={this.handleChange}/>
                   </div>
                 </div>
               </div>
-              <div className="col-md-7">
+            </div>
+            <div className="row">
+              <div className="col-md-12">
                 {action == "create" ?
                   <h2>Create This Person To Add Associations</h2>
                   :
                   <div>
-                    <a className="btn btn-primary m-1" data-toggle="collapse" href="#groups" role="button" aria-expanded="false" aria-controls="groups">
-                      Toggle Groups
-                    </a>
-                    
-                    <div className="collapse row" id="groups">
-                      <PersonGroups
-                        person_groups={person.person_groups}
-                        parent_model="Person"
-                        parent={person}
-                        defaultPageSize={5}
-                      />
-                    </div>
+                    <ul className="nav nav-tabs" id="myTab" role="tablist">
+                      <li className="nav-item">
+                        <a className="nav-link active" id="groups-tab" data-toggle="tab" href="#groups" role="tab" aria-controls="groups" aria-selected="true">Groups</a>
+                      </li>
+                      <li className="nav-item">
+                        <a className="nav-link" id="funds-tab" data-toggle="tab" href="#funds" role="tab" aria-controls="funds" aria-selected="false">Funds</a>
+                      </li>
+                      <li className="nav-item">
+                        <a className="nav-link" id="funds-tab" data-toggle="tab" href="#events" role="tab" aria-controls="events" aria-selected="false">Events</a>
+                      </li>
+                    </ul>
+                    <div className="tab-content" id="myTabContent">
+                      <div className="tab-pane fade show active" id="groups" role="tabpanel" aria-labelledby="groups-tab">
+                        <PersonGroups
+                          person_groups={person.person_groups}
+                          parent_model="Person"
+                          parent={person}
+                          defaultPageSize={5}
+                        />
+                      </div>
+                      <div className="tab-pane fade" id="funds" role="tabpanel" aria-labelledby="funds-tab">
+                        <PersonFunds
+                          person_funds={person.person_funds}
+                          parent_model="Person"
+                          parent={person}
+                          defaultPageSize={5}
+                        />
+                      </div>
+                      <div className="tab-pane fade" id="events" role="tabpanel" aria-labelledby="funds-tab">
+                        <PersonEvents
+                          person_events={person.person_events}
+                          parent_model="Person"
+                          parent={person}
+                          defaultPageSize={5}
+                        />
+                      </div>
+                    </div>  
                   </div>
                 }
 
@@ -309,10 +381,10 @@ class PersonForm extends React.Component {
    * @public
    */
   componentWillReceiveProps(nextProps) {
-    this.setState(prevState => {
-      prevState.person = (nextProps.person ? this.copy(nextProps.person) : this.defaults());
-      return prevState;
-    })
+    if (nextProps.person && ((nextProps.person.id != this.props.person.id) || this.state.iam_changes_pending))
+      this.setState({ person: this.copy(nextProps.person), iam_changes_pending: false });
+    else if (nextProps.person === undefined)
+      this.setState({ person: this.defaults() });
   }
 }
 

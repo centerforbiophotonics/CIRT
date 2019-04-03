@@ -47,7 +47,7 @@ class <%= class_name %>Search extends React.Component {
   onSuggestionsFetchRequested(){
     clearTimeout(this.searchTimeout);
     this.searchTimeout = setTimeout(() => {  
-      var url = new URL(window.location.origin+"/users/search");
+      var url = new URL(window.location.origin+"/<%= plural_table_name %>/search");
       url.searchParams.append("search_text", this.state.search_text);
       fetch(url).then(res => res.json())
         .then((data) => {
@@ -83,7 +83,8 @@ class <%= class_name %>Search extends React.Component {
     const inputProps = {
       placeholder: 'Enter a <%= singular_table_name.titleize %> name',
       value: this.state.search_text,
-      onChange: this.handleChange
+      onChange: this.handleChange,
+      onFocus: this.onSuggestionsFetchRequested
     };
 
     return (
@@ -97,6 +98,7 @@ class <%= class_name %>Search extends React.Component {
           onSuggestionSelected={(e, d) => {this.props.handleResultSelected(d.suggestion)}}
           renderSuggestion={this.renderSuggestion}
           inputProps={inputProps}
+          alwaysRenderSuggestions={true}
         />
       </div>
     );

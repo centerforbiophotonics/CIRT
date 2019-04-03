@@ -1,8 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import UserForm from './user_form';
-
 /**
  * Bootstrap card showing all the details of a user and its associated models.
  */

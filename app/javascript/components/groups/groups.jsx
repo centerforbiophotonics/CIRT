@@ -2,11 +2,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
+import { CSVLink } from 'react-csv';
 
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faPen, faEye, faPlus, faArrowUp } from '@fortawesome/free-solid-svg-icons'
+import { faPen, faEye, faPlus, faArrowUp, faFileImport, faFileExport} from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-library.add( faPen, faEye, faPlus, faArrowUp )
+library.add( faPen, faEye, faPlus, faArrowUp, faFileImport, faFileExport )
 
 import Group from './group';
 import GroupForm from './group_form';
@@ -40,6 +41,7 @@ class Groups extends React.Component {
     this.columnDefs = this.columnDefs.bind(this);
     this.backToTop = this.backToTop.bind(this);
     this.copy = this.copy.bind(this);
+    this.setExport = this.setExport.bind(this);
 
     this.state = {
       /** @type {Object} A hash of the records to display */
@@ -51,7 +53,9 @@ class Groups extends React.Component {
       /** @type {Boolean} Whether the edit menu is visible */
       editing: false,
       /** @type {Boolean} The record currently being displayed in either the show, add, or edit component. */
-      selected: null
+      selected: null,
+      /** @type {Array} The data that has been sorted and filtered by react table for export via CSVLink */
+      export_data: []
     };
   }
 
@@ -158,7 +162,24 @@ class Groups extends React.Component {
     return [
       { Header: 'Name', accessor: 'name' },
       { Header: 'Description', accessor: 'description' },
-      { Header: 'Group Category', accessor: 'group_category_id' },
+      { Header: 'Group Category', accessor: d => d.group_category ? d.group_category.name : "Uncategorized", id: 'groupCategoryName' },
+      { Header: 'People',
+        accessor: 'person_groups',
+        maxWidth: 100,
+        Cell: d => {
+          return (
+            <div>
+              {d.value.length}
+            </div>
+          )
+        },
+        sortMethod: (a, b) => {
+          if (Object.keys(a).length === Object.keys(b).length) {
+            return a > b ? 1 : -1;
+          }
+          return Object.keys(a).length > Object.keys(b).length ? 1 : -1;
+        }
+      },
       { 
         Header: 'Actions',
         Cell: d => {
@@ -193,13 +214,28 @@ class Groups extends React.Component {
   copy(obj){
     return JSON.parse(JSON.stringify(obj));
   }
+
+  /**
+   * Sets a state attribute that contains the data as filtered and sorted by react table and is used by CSVLink to download a CSV export.
+   * @public
+   */
+  setExport(){
+    if (this.reactTable)
+      this.setState({export_data: this.reactTable.getResolvedState().sortedData.map((r)=> r._original)});
+  }
      
   /** 
    * The render lifecycle method.
    * @public
    */
   render(){
-    let top_content = <a className="btn btn-secondary text-white mb-3" onClick={this.toggleAdd}><FontAwesomeIcon icon="plus"/></a>;
+    let top_content = (
+      <div className="float-left">
+        <a className="btn btn-secondary text-white mb-3" onClick={this.toggleAdd}>
+          <FontAwesomeIcon icon="plus"/>
+        </a>
+      </div>
+    );
     
     if (this.state.adding){
       top_content = <GroupForm 
@@ -229,18 +265,40 @@ class Groups extends React.Component {
       <div className="groups">
         <a className="btn btn-secondary text-white btn-sm" id="back-to-top" onClick={this.backToTop}><FontAwesomeIcon icon="arrow-up"/></a> 
         <div className="card">
-          <h2 className="card-title text-center">
+          <h2 className="card-title text-center mt-3">
             Groups     
           </h2>
 
+          <h4 className="text-center">
+            (Filtered to {this.state.export_data.length} out of {Object.keys(this.state.groups).length})
+          </h4>
+
           <div className="card-body">
-            {top_content}
+            <div className="clearfix">
+              {top_content}
+
+              <CSVLink 
+                data={this.state.export_data} 
+                className="btn btn-secondary text-white mb-3 float-right"
+                filename="CIRT_people_export.csv"
+                title="Export Current Table"
+              >
+                <FontAwesomeIcon icon="file-export"/>
+              </CSVLink>
+            </div>
 
             <ReactTable
               data={Object.values(this.state.groups)}
+              minRows={1}
               columns={this.columnDefs()}
               filterable
-              defaultPageSize={10}
+              defaultPageSize={100}
+              ref={(r)=>this.reactTable=r}
+              onSortedChange={this.setExport}
+              onFilteredChange={this.setExport}
+              defaultFilterMethod={(filter, row) =>
+                String(row[filter.id]).toLowerCase().includes(filter.value.toLowerCase())
+              }
             />
           </div>
         </div>
@@ -262,6 +320,8 @@ class Groups extends React.Component {
         document.getElementById("back-to-top").style.display = "none";
       }
     }
+
+    this.setExport();
   }
 
   /**

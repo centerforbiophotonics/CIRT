@@ -42,6 +42,10 @@ class PersonGroupsController < ApplicationController
     render json: PersonGroup.first(10)
   end
 
+  def all_roles
+    render :json => PersonGroup.all.distinct.pluck(:role).sort
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_person_group

@@ -68,3 +68,7 @@ gem 'pundit'
 
 gem 'textacular', '~> 5.0'
 gem 'pg'
+
+gem 'httparty'
+
+gem 'ancestry'

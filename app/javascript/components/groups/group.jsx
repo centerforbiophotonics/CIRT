@@ -1,7 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import GroupForm from './group_form';
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { faTimes } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+library.add( faTimes )
+
 
 /**
  * Bootstrap card showing all the details of a group and its associated models.
@@ -33,7 +37,9 @@ class Group extends React.Component {
     let group = this.props.group;
 
     let buttons = (
-      <a className="btn btn-secondary text-white" onClick={this.props.close}>Close</a>
+      <a className="btn btn-secondary text-white" onClick={this.props.close}>
+        <FontAwesomeIcon icon="times"/>
+      </a>
     );
 
     return (

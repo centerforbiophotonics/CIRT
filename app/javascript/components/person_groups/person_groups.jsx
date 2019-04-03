@@ -5,9 +5,9 @@ import 'react-table/react-table.css';
 import { CSVLink } from 'react-csv';
 
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faPen, faEye, faPlus, faArrowUp, faFileDownload} from '@fortawesome/free-solid-svg-icons'
+import { faPen, faEye, faPlus, faArrowUp, faFileImport, faFileExport } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-library.add( faPen, faEye, faPlus, faArrowUp, faFileDownload )
+library.add( faPen, faEye, faPlus, faArrowUp, faFileImport, faFileExport )
 
 import PersonGroup from './person_group';
 import PersonGroupForm from './person_group_form';
@@ -28,11 +28,13 @@ class PersonGroups extends React.Component {
     /** @type {object} The parent object these records belong to. */
     parent: PropTypes.object,
     /** @type {number} Passed to ReactTable to set the initial number of rows per page */
-    defaultPageSize: PropTypes.number
+    defaultPageSize: PropTypes.number,
+    /** @type {boolean} Whether to show edit buttons and forms. */
+    readOnly: PropTypes.bool
   };
 
   static defaultProps = {
-    defaultPageSize: 10
+    defaultPageSize: 100
   };
 
   /** 
@@ -53,8 +55,6 @@ class PersonGroups extends React.Component {
     this.backToTop = this.backToTop.bind(this);
     this.copy = this.copy.bind(this);
     this.setExport = this.setExport.bind(this);
-
-    console.log(props.person_groups);
 
     this.state = {
       /** @type {Object} A hash of the records to display */
@@ -172,9 +172,18 @@ class PersonGroups extends React.Component {
    * @public
    */
   columnDefs(){
-    return [
-      { Header: 'Group', accessor: d => d.group.name, id: 'groupName' },
-      { Header: 'Person', accessor: d => d.person.name, id: 'personName' },
+    let columns = [];
+
+    if (this.props.parent_model != "Person"){
+      columns.push({ Header: 'Person', accessor: d => d.person.name, id: 'personName' },);
+    }
+
+    if (this.props.parent_model != "Group"){
+      columns.push({ Header: 'Group', accessor: d => d.group.name, id: 'groupName' },);
+
+    } 
+
+    columns = columns.concat([
       { Header: 'Role', accessor: 'role' },
       { Header: 'Start', accessor: 'start' },
       { Header: 'End', accessor: 'end' },
@@ -184,7 +193,9 @@ class PersonGroups extends React.Component {
           return (
             <div>
               <a className="btn btn-sm btn-secondary text-white" onClick={(e)=>{this.toggleShow(e,d)}}><FontAwesomeIcon icon="eye"/></a>
-              <a className="btn btn-sm btn-secondary text-white ml-1" onClick={(e)=>{this.toggleUpdate(e,d)}}><FontAwesomeIcon icon="pen"/></a>
+              {!this.props.readOnly &&
+                <a className="btn btn-sm btn-secondary text-white ml-1" onClick={(e)=>{this.toggleUpdate(e,d)}}><FontAwesomeIcon icon="pen"/></a>
+              }
             </div>
           )
         },
@@ -193,7 +204,9 @@ class PersonGroups extends React.Component {
         resizable: false,
         filterable: false
       }
-    ];
+    ])
+
+    return columns;
   }
 
   /** 
@@ -227,7 +240,11 @@ class PersonGroups extends React.Component {
    * @public
    */
   render(){
-    let top_content = <a className="btn btn-secondary text-white mb-3" onClick={this.toggleAdd}><FontAwesomeIcon icon="plus"/></a>;
+    let top_content = null
+
+    if (this.readOnly === false){
+     top_content = <a className="btn btn-secondary text-white mb-3" onClick={this.toggleAdd}><FontAwesomeIcon icon="plus"/></a>;
+    }
     
     if (this.state.adding){
       top_content = <PersonGroupForm 
@@ -258,22 +275,31 @@ class PersonGroups extends React.Component {
     }
 
     return (
-      <div className="person_groups col-md-12">
+      <div className="person_groups col-md-12 p-0">
         <a className="btn btn-secondary text-white btn-sm" id="back-to-top" onClick={this.backToTop}><FontAwesomeIcon icon="arrow-up"/></a> 
         <div className="card">
-          <h2 className="card-title text-center">
-            Group Associations    
+          <h2 className="card-title text-center mt-3">
+            {this.props.parent && this.props.parent.name ? this.props.parent.name : null} Group Associations    
           </h2>
+
+          <h4 className="text-center">
+            (Filtered to {this.state.export_data.length} out of {Object.keys(this.state.person_groups).length})
+          </h4>
 
           <div className="card-body">
             {top_content}
 
-            <CSVLink data={this.state.export_data} className="btn btn-secondary text-white mb-3 ml-1">
-              <FontAwesomeIcon icon="file-download"/>
+            <CSVLink 
+              data={this.state.export_data} 
+              className="btn btn-secondary text-white mb-3 ml-1"
+              filename="CIRT_group_associations_export.csv"
+            >
+              <FontAwesomeIcon icon="file-export"/>
             </CSVLink>
 
             <ReactTable
               data={Object.values(this.state.person_groups)}
+              minRows={1}
               columns={this.columnDefs()}
               filterable
               defaultPageSize={this.props.defaultPageSize}

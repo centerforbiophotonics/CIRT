@@ -52,6 +52,8 @@ GEM
       tzinfo (~> 1.1)
     addressable (2.5.2)
       public_suffix (>= 2.0.2, < 4.0)
+    ancestry (3.0.5)
+      activerecord (>= 3.2.0)
     archive-zip (0.11.0)
       io-like (~> 0.3.0)
     arel (9.0.0)
@@ -86,6 +88,8 @@ GEM
     ffi (1.9.25)
     globalid (0.4.1)
       activesupport (>= 4.2.0)
+    httparty (0.16.2)
+      multi_xml (>= 0.5.2)
     i18n (1.1.0)
       concurrent-ruby (~> 1.0)
     io-like (0.3.0)
@@ -110,6 +114,7 @@ GEM
     minitest (5.11.3)
     msgpack (1.2.4)
     multi_json (1.13.1)
+    multi_xml (0.6.0)
     nio4r (2.3.1)
     nokogiri (1.8.4)
       mini_portile2 (~> 2.3.0)
@@ -215,11 +220,13 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  ancestry
   bootsnap (>= 1.1.0)
   byebug
   capybara (>= 2.15)
   chromedriver-helper
   coffee-rails (~> 4.2)
+  httparty
   jbuilder (~> 2.5)
   listen (>= 3.0.5, < 3.2)
   pg

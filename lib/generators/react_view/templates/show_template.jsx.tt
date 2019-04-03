@@ -1,8 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import <%= class_name %>Form from './<%= singular_table_name %>_form';
-
 /**
  * Bootstrap card showing all the details of a <%= singular_table_name %> and its associated models.
  */

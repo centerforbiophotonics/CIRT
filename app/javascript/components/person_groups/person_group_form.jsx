@@ -7,6 +7,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 library.add( faPen, faPlus)
 
 import PersonSearch from '../people/person_search';
+import PersonForm from '../people/person_form';
+
 import GroupSearch from '../groups/group_search';
 import GroupForm from '../groups/group_form';
 
@@ -20,6 +22,8 @@ class PersonGroupForm extends React.Component {
     current_user: PropTypes.object,
     /** @type {function} A handler to invoke after successfully updating or creating a record via AJAX. */
     handleUpdate: PropTypes.func,
+    /** @type {function} A handler to invoke after successfully creating a record via AJAX. */
+    handleNew: PropTypes.func,
     /** @type {function} A handler to invoke after successfully deleting a record via AJAX. */
     handleDelete: PropTypes.func,
     /** @type {function} A handler that hides/closes the form. */
@@ -46,20 +50,23 @@ class PersonGroupForm extends React.Component {
     this.handleDelete = this.handleDelete.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
 
+    this.handlePersonEditToggle = this.handlePersonEditToggle.bind(this);
+    this.handleGroupEditToggle = this.handleGroupEditToggle.bind(this);
+
     this.handlePersonSelected = this.handlePersonSelected.bind(this);
     this.handleGroupSelected = this.handleGroupSelected.bind(this);
-
-    this.handleSubmit = this.handleSubmit.bind(this);
 
     this.valid = this.valid.bind(this);
     this.defaults = this.defaults.bind(this);
     this.copy = this.copy.bind(this);
-
+    
+    this.renderPersonSelector = this.renderPersonSelector.bind(this);
     this.renderGroupSelector = this.renderGroupSelector.bind(this);
     
-
     this.state = {
-      person_group: this.copy(this.props.person_group)
+      person_group: this.copy(this.props.person_group),
+      editing_group: (this.props.action == "create" ? true : false),
+      editing_person: (this.props.action == "create" ? true : false)
     }
 
     this.token = document.head.querySelector("[name=csrf-token]").content;
@@ -69,7 +76,6 @@ class PersonGroupForm extends React.Component {
       'X-Requested-With': 'XMLHttpRequest',
       'X-CSRF-Token': this.token
     };
-
   }
 
   /** 
@@ -150,14 +156,37 @@ class PersonGroupForm extends React.Component {
     } 
   }
 
+
+  handlePersonEditToggle(e){
+    if (e.isDefaultPrevented != null && e.isDefaultPrevented() == false)
+      e.preventDefault();
+
+    this.setState(prevState => {
+      prevState.editing_person = !prevState.editing_person
+      return prevState;
+    });
+  }
+
+  handleGroupEditToggle(e){
+    if (e.isDefaultPrevented != null && e.isDefaultPrevented() == false)
+      e.preventDefault();
+
+    this.setState(prevState => {
+      prevState.editing_group = !prevState.editing_group
+      return prevState;
+    });
+  }
+
+
   /** 
    * Handler invoked by PersonSearch component which sets the associated person id.
    * @param {object} person - A person object
    */
   handlePersonSelected(person){
     this.setState(prevState => {
-      prevState.person_group.person_id = person.id
-      prevState.person_group.person = person
+      prevState.person_group.person_id = person.id;
+      prevState.person_group.person = person;
+      prevState.editing_person = false;
       return prevState;
     });
   }
@@ -168,8 +197,9 @@ class PersonGroupForm extends React.Component {
    */
   handleGroupSelected(group){
     this.setState(prevState => {
-      prevState.person_group.group_id = group.id
-      prevState.person_group.group = group
+      prevState.person_group.group_id = group.id;
+      prevState.person_group.group = group;
+      prevState.editing_group = false;
       return prevState;
     });
   }
@@ -202,7 +232,7 @@ class PersonGroupForm extends React.Component {
 
   /**
    * An function that recieves a record, clones it to avoid reference errors, and replaces null values with their default values.
-   * @param {object} A record to copy
+   * @param {object} obj - A record to copy
    * @return {object} A copy of the provided record with nulls replaced by defaults.
    * @public
    */
@@ -218,20 +248,63 @@ class PersonGroupForm extends React.Component {
     return copiedObj;
   }
 
-  renderGroupSelector(className){
+  /*
+   * Returns an interface for searching for an existing person or creating a new one.
+   * @param {string} className - a class to apply to the outermost div
+   * @param {string} id - an id to apply to the outmost div
+   * @public
+   */
+  renderPersonSelector(){
     return (
-      <div className={className} id="group_edit">
-        <GroupSearch handleResultSelected={this.handleGroupSelected} />
-        Or create a new one <a className="btn btn-sm btn-secondary text-white" data-toggle="collapse" href="#group_create" role="button" aria-expanded="false" aria-controls="group_create"><FontAwesomeIcon icon="plus"/></a>
-        <div className="collapse" id="group_create">
-          <GroupForm 
-            handleUpdate={this.handleGroupSelected} 
-            action="create" 
-            current_user={this.props.current_user}
-            handleNew={this.handleGroupSelected}
-            parent_model={this.props.parent_model}
-          /> 
-        </div>
+      <div className="ml-3">
+        {(this.props.action != "create" || this.state.person_group.person_id != "") &&
+          <a className="btn btn-sm btn-secondary text-white" role="button" onClick={this.handlePersonEditToggle} aria-expanded="false" aria-controls="person_edit"><FontAwesomeIcon icon="pen"/></a>
+        }
+        {this.state.editing_person &&
+          <div id="person_edit">
+            <PersonSearch handleResultSelected={this.handlePersonSelected} />
+            Or create a new one <a className="btn btn-sm btn-secondary text-white" data-toggle="collapse" href="#person_create" role="button" aria-expanded="false" aria-controls="person_create"><FontAwesomeIcon icon="plus"/></a>
+            <div className="collapse" id="person_create">
+              <PersonForm 
+                action="create" 
+                current_user={this.props.current_user}
+                handleNew={this.handlePersonSelected}
+                parent_model={this.props.parent_model}
+              /> 
+            </div>
+          </div>
+        }
+        
+      </div>
+    )
+  }
+
+  /*
+   * Returns an interface for searching for an existing group or creating a new one.
+   * @param {string} className - a class to apply to the outermost div
+   * @param {string} id - an id to apply to the outmost div
+   * @public
+   */
+  renderGroupSelector(){
+    return (
+      <div className="ml-3">
+        {(this.props.action != "create" || this.state.person_group.group_id != "") &&
+          <a className="btn btn-sm btn-secondary text-white" role="button" onClick={this.handleGroupEditToggle} aria-expanded="false" aria-controls="group_edit"><FontAwesomeIcon icon="pen"/></a>
+        }
+        {this.state.editing_group && 
+          <div id="group_edit">
+            <GroupSearch handleResultSelected={this.handleGroupSelected} />
+            Or create a new one <a className="btn btn-sm btn-secondary text-white" data-toggle="collapse" href="#group_create" role="button" aria-expanded="false" aria-controls="group_create"><FontAwesomeIcon icon="plus"/></a>
+            <div className="collapse" id="group_create">
+              <GroupForm 
+                action="create" 
+                current_user={this.props.current_user}
+                handleNew={this.handleGroupSelected}
+                parent_model={this.props.parent_model}
+              /> 
+            </div>
+          </div>
+        }
       </div>
     )
   }
@@ -278,28 +351,21 @@ class PersonGroupForm extends React.Component {
             <div className="col-md-6">
               {this.props.parent_model != "Group" &&
                 <div className="form-group">
-                  {person_group.group ? 
-                    <div>
-                      <label htmlFor="group_name" className="font-weight-bold">Group</label>
-                      <p id="group_name">{person_group.group.name}</p>
-                      <a className="btn btn-sm btn-secondary text-white" data-toggle="collapse" href="#group_edit" role="button" aria-expanded="false" aria-controls="group_edit"><FontAwesomeIcon icon="pen"/></a>
-                      {this.renderGroupSelector("collapse")}
-                    </div>
-                    :
-                    <div>
-                      {this.renderGroupSelector()}
-                    </div>
+                  <label htmlFor="group_name" className="font-weight-bold">Group</label>
+                  {person_group.group &&
+                    <p className="ml-3" id="group_name col-10">{person_group.group.name}</p>
                   }
-                  
+                  {this.renderGroupSelector()}
                 </div>
               }
 
               {this.props.parent_model != "Person" &&
                 <div className="form-group">
-                  <label htmlFor="person_id" className="font-weight-bold">Person</label>
-                  <input type="hidden" className="form-control" id="person_id" name="person_id" aria-describedby="person_id_help" value={person_group.person_id} placeholder="Enter Person" onChange={this.handleChange}/>
-                  <PersonSearch handleResultSelected={this.handlePersonSelected} />
-                  <small id="person_id_help" className="form-text text-muted">Help text placeholder.</small>
+                  <label htmlFor="person_name" className="font-weight-bold">Person</label>
+                  {person_group.person &&
+                    <p className="ml-3" id="person_name">{person_group.person.name}</p>
+                  }
+                  {this.renderPersonSelector()}
                 </div>
               }
             </div>
@@ -307,20 +373,17 @@ class PersonGroupForm extends React.Component {
             <div className="col-md-6">  
               <div className="form-group">
                 <label htmlFor="role" className="font-weight-bold">Role</label>
-                <input type="text" className="form-control" id="role" name="role" aria-describedby="role_help" value={person_group.role} placeholder="Enter Role" onChange={this.handleChange}/>
-                <small id="role_help" className="form-text text-muted">Help text placeholder.</small>
+                <input type="text" className="form-control ml-3" id="role" name="role" aria-describedby="role_help" value={person_group.role} placeholder="Enter Role" onChange={this.handleChange}/>
               </div>
 
               <div className="form-group">
                 <label htmlFor="start" className="font-weight-bold">Start</label>
-                <input type="text" className="form-control" id="start" name="start" aria-describedby="start_help" value={person_group.start} placeholder="Enter Start" onChange={this.handleChange}/>
-                <small id="start_help" className="form-text text-muted">Help text placeholder.</small>
+                <input type="text" className="form-control ml-3" id="start" name="start" aria-describedby="start_help" value={person_group.start} placeholder="Enter Start" onChange={this.handleChange}/>
               </div>
 
               <div className="form-group">
                 <label htmlFor="end" className="font-weight-bold">End</label>
-                <input type="text" className="form-control" id="end" name="end" aria-describedby="end_help" value={person_group.end} placeholder="Enter End" onChange={this.handleChange}/>
-                <small id="end_help" className="form-text text-muted">Help text placeholder.</small>
+                <input type="text" className="form-control ml-3" id="end" name="end" aria-describedby="end_help" value={person_group.end} placeholder="Enter End" onChange={this.handleChange}/>
               </div>
             </div>   
           </div>
