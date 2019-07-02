@@ -1,5 +1,6 @@
 class PersonEventsController < ApplicationController
   before_action :set_person_event, only: [:update, :destroy]
+  before_action :check_authorization
 
   # GET /person_events
   def index
@@ -51,5 +52,9 @@ class PersonEventsController < ApplicationController
     # Only allow a trusted parameter "white list" through.
     def person_event_params
       params.require(:person_event).permit(:person_id, :event_id, :status)
+    end
+
+    def check_authorization
+      authorize PersonEvent
     end
 end

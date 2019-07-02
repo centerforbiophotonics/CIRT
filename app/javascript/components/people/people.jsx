@@ -22,7 +22,7 @@ import PersonGroupTableCell from './person_group_table_cell';
 
 
 /**
- * User interface for listing, filtering and exporting People. Renders subcomponents for CRUD actions. Can be used a root component or rendered from the form or show component of an associated model. 
+ * User interface for listing, filtering and exporting People. Renders subcomponents for CRUD actions. Can be used a root component or rendered from the form or show component of an associated model.
  */
 class People extends React.Component {
   static propTypes = {
@@ -46,14 +46,14 @@ class People extends React.Component {
     defaultPageSize: 100
   };
 
-  /** 
-   * The constructor lifecycle method. 
-   * @param {object} props - The component's props 
+  /**
+   * The constructor lifecycle method.
+   * @param {object} props - The component's props
    * @public
    */
   constructor(props){
     super(props);
-        
+
     this.toggleAdd = this.toggleAdd.bind(this);
     this.add = this.add.bind(this);
     this.toggleImport = this.toggleImport.bind(this);
@@ -95,14 +95,14 @@ class People extends React.Component {
     };
   }
 
-  /** 
-   * Click handler that toggles the add menu and hides the show and edit components. 
+  /**
+   * Click handler that toggles the add menu and hides the show and edit components.
    * @public
    */
   toggleAdd(e){
     if (e.isDefaultPrevented != null && e.isDefaultPrevented() === false)
       e.preventDefault();
-    
+
     this.setState(prevState => ({
       adding: !prevState.adding,
       editing: false,
@@ -112,8 +112,8 @@ class People extends React.Component {
     this.backToTop();
   }
 
-  /** 
-   * Handler invoked after a form succeeds in adding a new model instance to update the client state. 
+  /**
+   * Handler invoked after a form succeeds in adding a new model instance to update the client state.
    * @param {object} person - The model instance to add to the current state.
    * @public
    */
@@ -128,19 +128,19 @@ class People extends React.Component {
       prevState.status_showing = true;
       prevState.status_message = person.name+" created.";
       prevState.status_message_type = "success";
-      
+
       return prevState;
     });
   }
 
-  /** 
-   * Click handler that toggles the import menu. 
+  /**
+   * Click handler that toggles the import menu.
    * @public
    */
   toggleImport(e){
     if (e.isDefaultPrevented != null && e.isDefaultPrevented() === false)
       e.preventDefault();
-    
+
     this.setState(prevState => ({
       importing: !prevState.importing,
       adding: false,
@@ -152,8 +152,8 @@ class People extends React.Component {
     this.backToTop();
   }
 
-  /** 
-   * Handler invoked after the import form succeeds in adding a new model instance(s) to update the client state. 
+  /**
+   * Handler invoked after the import form succeeds in adding a new model instance(s) to update the client state.
    * @param {object} person - The model instance to add to the current state.
    * @public
    */
@@ -162,19 +162,19 @@ class People extends React.Component {
       prevState.status_showing = true;
       prevState.status_message = people.length+" people created.";
       prevState.status_message_type = "success";
-      
+
       return prevState;
     });
   }
 
-  /** 
-   * Click handler that toggles the cleanup menu. 
+  /**
+   * Click handler that toggles the cleanup menu.
    * @public
    */
   toggleCleaning(e){
     if (e.isDefaultPrevented != null && e.isDefaultPrevented() === false)
       e.preventDefault();
-    
+
     this.setState(prevState => ({
       cleaning: !prevState.cleaning,
       adding: false,
@@ -186,8 +186,8 @@ class People extends React.Component {
     this.backToTop();
   }
 
-  /** 
-   * Handler invoked after the cleanup form succeeds in updating and removing model instances. 
+  /**
+   * Handler invoked after the cleanup form succeeds in updating and removing model instances.
    * @param {object} person - The model instance to add to the current state.
    * @public
    */
@@ -203,10 +203,10 @@ class People extends React.Component {
 
       prevState.status_showing = true;
       prevState.status_message = (
-        (people.updated.length > 0 && 
+        (people.updated.length > 0 &&
           people.updated.length + " people updated. "
         )+
-        (people.deleted.length > 0 && 
+        (people.deleted.length > 0 &&
           people.deleted.length + " people deleted. "
         )
       );
@@ -215,15 +215,15 @@ class People extends React.Component {
       prevState.showing = true;
       prevState.cleaning = false;
       prevState.selected = people.updated[0]
-      
+
       return prevState;
     });
 
     this.backToTop();
   }
 
-  /** 
-   * Click handler that toggles the edit menu and hides the show and add components. 
+  /**
+   * Click handler that toggles the edit menu and hides the show and add components.
    * @public
    */
   toggleUpdate(e,d){
@@ -242,8 +242,8 @@ class People extends React.Component {
     this.backToTop();
   }
 
-  /** 
-   * Handler invoked after a form succeeds in editing a model instance to update the client state. 
+  /**
+   * Handler invoked after a form succeeds in editing a model instance to update the client state.
    * @param {object} person - The updated model instance replace in the current state.
    * @public
    */
@@ -258,8 +258,8 @@ class People extends React.Component {
     });
   }
 
-  /** 
-   * Click handler that toggles the show component and hides the edit and add components. 
+  /**
+   * Click handler that toggles the show component and hides the edit and add components.
    * @public
    */
   toggleShow(e,d){
@@ -278,8 +278,8 @@ class People extends React.Component {
     this.backToTop();
   }
 
-  /** 
-   * Handler invoked after a form succeeds in deleting a model instance to update the client state. 
+  /**
+   * Handler invoked after a form succeeds in deleting a model instance to update the client state.
    * @param {object} person - The deleted model instance remove from the current state.
    * @public
    */
@@ -321,7 +321,7 @@ class People extends React.Component {
           return filter.value.includes(row._original.id);
         },
         Filter: ({ filter, onChange }) =>
-          <GroupFilter 
+          <GroupFilter
             title="Show people who . . . "
             apply={value => onChange(value)}
           />,
@@ -340,7 +340,7 @@ class People extends React.Component {
           return filter.value.includes(row._original.id);
         },
         Filter: ({ filter, onChange }) =>
-          <EventFilter 
+          <EventFilter
             title="Show people who . . . "
             apply={value => onChange(value)}
           />,
@@ -375,13 +375,38 @@ class People extends React.Component {
         }
       },
 
-      { 
+      { Header: 'Consultations',
+        accessor: 'person_consultations',
+        maxWidth: 130,
+        Cell: d => {
+          return (
+            <div>
+              {Object.keys(d.value).length}
+            </div>
+          )
+        },
+        filterMethod: (filter, row) => {
+
+        },
+        Filter: ({ filter, onChange }) =>
+          <EventFilter title="Show people who . . . "/>,
+        sortMethod: (a, b) => {
+          if (Object.keys(a).length === Object.keys(b).length) {
+            return a > b ? 1 : -1;
+          }
+          return Object.keys(a).length > Object.keys(b).length ? 1 : -1;
+        }
+      },
+
+      {
         Header: 'Actions',
         Cell: d => {
           return (
             <div>
               <a className="btn btn-sm btn-secondary text-white" onClick={(e)=>{this.toggleShow(e,d)}}><FontAwesomeIcon icon="eye"/></a>
-              <a className="btn btn-sm btn-secondary text-white ml-1" onClick={(e)=>{this.toggleUpdate(e,d)}}><FontAwesomeIcon icon="pen"/></a>
+              { this.props.current_user.roles.includes("edit") &&
+                <a className="btn btn-sm btn-secondary text-white ml-1" onClick={(e)=>{this.toggleUpdate(e,d)}}><FontAwesomeIcon icon="pen"/></a>
+              }
             </div>
           )
         },
@@ -394,8 +419,8 @@ class People extends React.Component {
     ];
   }
 
-  /** 
-   * Scrolls the window to the top of the page. 
+  /**
+   * Scrolls the window to the top of the page.
    * @public
    */
   backToTop(e){
@@ -417,21 +442,20 @@ class People extends React.Component {
    */
   setExport(){
     if (this.reactTable)
-      this.setState({export_data: this.reactTable.getResolvedState().sortedData.map((r)=> r._original)});
-      // this.setState({
-      //   export_data: this.reactTable.getResolvedState().sortedData.map((r) => {
-      //     return {
-      //       name: r._original.name,
-      //       email: r._original.email,
-      //       roles: r._original.roles.join(" and "),
-      //       tou_agreed: Object.values(r._original.person_groups).map(pg => (pg.role+" in "+pg.group.name)).join(", ")
-      //     }
-      //     return r._original;
-      //   })
-      // });
+      //this.setState({export_data: this.reactTable.getResolvedState().sortedData.map((r)=> r._original)});
+      this.setState({
+        export_data: this.reactTable.getResolvedState().sortedData.map((r) => {
+          return {
+            name: r._original.name,
+            email: r._original.email,
+            roles: Object.values(r._original.person_groups).map(pg => (pg.role+" in "+pg.group.name)).join(", ")
+          }
+          //return r._original;
+        })
+      });
   }
 
-  
+
   /**
    * Toggles a state variable to determine if the alert prompt is shown or not.
    * @public
@@ -445,26 +469,26 @@ class People extends React.Component {
 
     this.backToTop();
   }
-  
-  /** 
+
+  /**
    * The render lifecycle method.
    * @public
    */
   render(){
-    
+
 
     return (
       <div className="people col-md-12 p-0" id="people">
-        <a 
-          className="btn btn-secondary text-white btn-sm" 
-          id="back-to-top" 
+        <a
+          className="btn btn-secondary text-white btn-sm"
+          id="back-to-top"
           onClick={this.backToTop}
         >
           <FontAwesomeIcon icon="arrow-up"/>
-        </a> 
+        </a>
         <div className="card">
           <h2 className="card-title text-center mt-3">
-            People     
+            People
           </h2>
 
           <h4 className="text-center">
@@ -479,8 +503,8 @@ class People extends React.Component {
             <div className="clearfix">
               {
                 this.state.status_showing ?
-                  <div 
-                    className={"alert alert-"+this.state.status_message_type+" alert-dismissible mx-5"} 
+                  <div
+                    className={"alert alert-"+this.state.status_message_type+" alert-dismissible mx-5"}
                     role={this.state.status_message_type}
                   >
                     <button type="button" className="close" aria-label="Close" onClick={this.toggleAlert}>
@@ -490,8 +514,8 @@ class People extends React.Component {
                   </div>
                 : this.state.status_message != "" ?
                   <div className="float-right mb-3">
-                    <a 
-                      className="btn btn-secondary text-white" 
+                    <a
+                      className="btn btn-secondary text-white"
                       onClick={this.toggleAlert}
                       title="Show Page Alerts"
                     >
@@ -501,90 +525,95 @@ class People extends React.Component {
                 : null
               }
             </div>
-            
+
 
             <div className="clearfix">
               {
-                this.state.adding ?   
-                  <PersonForm 
-                    action="create" 
+                this.state.adding ?
+                  <PersonForm
+                    action="create"
                     current_user={this.props.current_user}
                     handleNew={this.add}
                     handleFormToggle={this.toggleAdd}
                   />
                 : this.state.editing ?
-                  <PersonForm 
-                    action="update" 
-                    person={this.state.selected} 
+                  <PersonForm
+                    action="update"
+                    person={this.state.selected}
                     current_user={this.props.current_user}
-                    handleUpdate={this.update} 
+                    handleUpdate={this.update}
                     handleDelete={this.delete}
                     handleFormToggle={this.toggleUpdate}
                   />
                 : this.state.showing ?
-                  <Person 
+                  <Person
                     person={this.state.selected}
                     current_user={this.props.current_user}
                     close={this.toggleShow}
                   />
                 : this.state.importing ?
-                  <PeopleImport 
+                  <PeopleImport
                     people={this.state.people}
                     close={this.toggleImport}
                   />
                 : this.state.cleaning ?
-                  <PeopleCleaner 
+                  <PeopleCleaner
                     people={this.state.people}
                     close={this.toggleCleaning}
                     merge={this.clean}
                   />
-                : 
+                :
                   <div className="float-left">
-                    <a 
-                      className="btn btn-secondary text-white mb-3" 
-                      onClick={this.toggleAdd}
-                      title="Manually Add a Person"
-                    >
-                      <FontAwesomeIcon icon="plus"/>
-                    </a>
+                    { this.props.current_user.roles.includes("edit") &&
+                      <React.Fragment>
+                        <a
+                          className="btn btn-secondary text-white mb-3"
+                          onClick={this.toggleAdd}
+                          title="Manually Add a Person"
+                        >
+                          <FontAwesomeIcon icon="plus"/> Add
+                        </a>
 
-                    <a 
-                      className="btn btn-secondary text-white mb-3 ml-1" 
-                      onClick={this.toggleImport}
-                      title="Import People From CSV"
-                    >
-                      <FontAwesomeIcon icon="file-import"/>
-                    </a>
+                        <a
+                          className="btn btn-secondary text-white mb-3 ml-1"
+                          onClick={this.toggleImport}
+                          title="Import People From CSV"
+                        >
+                          <FontAwesomeIcon icon="file-import"/> Import
+                        </a>
 
-                    <a 
-                      className="btn btn-secondary text-white mb-3 ml-1" 
-                      onClick={this.toggleCleaning}
-                      title="Clean and Bulk Update Data"
-                    >
-                      <FontAwesomeIcon icon="broom"/>
-                    </a>
+                        <a
+                          className="btn btn-secondary text-white mb-3 ml-1"
+                          onClick={this.toggleCleaning}
+                          title="Clean and Bulk Update Data"
+                        >
+                          <FontAwesomeIcon icon="broom"/> Cleanup
+                        </a>
+                      </React.Fragment>
+                    }
 
-                    <a 
-                      className="btn btn-secondary text-white mb-3 ml-1" 
+
+                    <a
+                      className="btn btn-secondary text-white mb-3 ml-1"
                       onClick={() => {}}
                       title="Column Visibility"
                     >
-                      <FontAwesomeIcon icon="low-vision"/>
+                      <FontAwesomeIcon icon="low-vision"/> Columns
                     </a>
 
                   </div>
               }
-               
-              <CSVLink 
-                data={this.state.export_data} 
+
+              <CSVLink
+                data={this.state.export_data}
                 className="btn btn-secondary text-white mb-3 float-right"
                 filename="CIRT_people_export.csv"
                 title="Export Current Table"
               >
-                <FontAwesomeIcon icon="file-export"/>
+                <FontAwesomeIcon icon="file-export"/> Export
               </CSVLink>
             </div>
-            
+
 
             <ReactTable
               data={Object.values(this.state.people)}
@@ -613,13 +642,13 @@ class People extends React.Component {
     );
   }
 
-  /** 
-   * The componentDidMount lifecycle method. Registers an window scroll listener that shows/hides the back-to-top button 
+  /**
+   * The componentDidMount lifecycle method. Registers an window scroll listener that shows/hides the back-to-top button
    * @public
    */
-  componentDidMount(){  
+  componentDidMount(){
     var buttonScrollThreshold = 177;
-    
+
     window.onscroll = function() {
       if (document.body.scrollTop > buttonScrollThreshold || document.documentElement.scrollTop > buttonScrollThreshold) {
         document.getElementById("back-to-top").style.display = "block";
@@ -632,11 +661,11 @@ class People extends React.Component {
   }
 
   /**
-   * The componentWillReceiveProps lifecycle method. 
-   * Because the records stored in the state are initially set from a prop, 
-   * if the prop is updated this ensures the state is updated as well. 
-   * This will happen when this component is not the root, 
-   * but is rendered by another component to display its associated model attributes. 
+   * The componentWillReceiveProps lifecycle method.
+   * Because the records stored in the state are initially set from a prop,
+   * if the prop is updated this ensures the state is updated as well.
+   * This will happen when this component is not the root,
+   * but is rendered by another component to display its associated model attributes.
    * @public
    */
   // componentWillReceiveProps(nextProps) {

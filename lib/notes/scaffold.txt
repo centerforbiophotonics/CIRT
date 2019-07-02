@@ -34,9 +34,14 @@ rails g react_view Role name:string variants:string
 rails g model ConsultationCategory name:string description:string
 rails g react_view ConsultationCategory name:string description:string
 
-rails g model Consultation description:string date:string consultants:string minutes:integer consultation_category:references
-rails g react_view Consultation description:string date:date consultant:integer minutes:integer consultation_category:references
+rails g model Consultation description:string dates:string consultants:string minutes:string consultation_category:references ccrc_id:integer
+rails g react_view Consultation description:string dates:string consultants:string minutes:string consultation_category:references ccrc_id:integer
 
 rails g model PersonConsultation person:belongs_to consultation:belongs_to
 rails g react_view PersonConsultation person:belongs_to consultation:belongs_to
 
+rails g model ScantronAppointment date:date course:string term_code:string number_of_scantrons:integer
+rails g react_view ScantronAppointment date:date course:string term_code:integer number_of_scantrons:integer
+
+rails g model PersonScantronAppointment person:belongs_to scantron_appointment:belongs_to
+rails g react_view PersonScantronAppointment person:belongs_to scantron_appointment:belongs_to

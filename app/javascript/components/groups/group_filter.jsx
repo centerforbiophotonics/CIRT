@@ -19,9 +19,9 @@ class GroupFilter extends React.Component {
     title: PropTypes.string
   }
 
-  /** 
-   * The constructor lifecycle method. 
-   * @param {object} props - The component's props 
+  /**
+   * The constructor lifecycle method.
+   * @param {object} props - The component's props
    * @public
    */
   constructor(props){
@@ -70,7 +70,7 @@ class GroupFilter extends React.Component {
   defaultConditions(){
     return {
       roles: [],
-      groups: [] 
+      groups: []
     }
   }
 
@@ -97,26 +97,26 @@ class GroupFilter extends React.Component {
         },
         (error) => {
           this.setState({
-            error:error 
+            error:error
           });
         }
       )
   }
 
-  /** 
+  /**
    * The render lifecycle method.
    * @public
    */
   render(){
     return (
       <div>
-        <button 
-          className={"btn "+(this.state.dirty ? "btn-warning" : "btn-secondary")+" text-white btn-sm"} 
+        <button
+          className={"btn "+(this.state.dirty ? "btn-warning" : "btn-secondary")+" text-white btn-sm"}
           onClick={this.toggleOpen}
         >
           Filter
         </button>
-        {this.state.open && 
+        {this.state.open &&
           <AriaModal
             titleText="Group Filter"
             titleId="group-filter-title"
@@ -127,7 +127,7 @@ class GroupFilter extends React.Component {
           >
             <div className="card mt-3 p-3" id="group-filter-modal">
               <h2 className="card-title text-center" id="group-filter-title">
-                {this.props.title}     
+                {this.props.title}
               </h2>
 
               <div className="form-group mb-3">
@@ -155,7 +155,7 @@ class GroupFilter extends React.Component {
                     })
                   }}
                 />
-              </div> 
+              </div>
 
               <div className="form-group">
                 <label htmlFor="groups">Or belong to any of the following groups</label>
@@ -178,43 +178,43 @@ class GroupFilter extends React.Component {
                     })
                   }}
                 />
-              </div> 
+              </div>
 
               <div className="form-actions mt-3">
-                <button 
-                  type="button" 
-                  className="btn btn-primary text-white" 
+                <button
+                  type="button"
+                  className="btn btn-primary text-white"
                   onClick={this.fetchPeopleFromConditions}
                 >
                   Apply
                 </button>
-                
-                <button 
-                  type="button" 
-                  className="btn btn-primary text-white float-right" 
+
+                <button
+                  type="button"
+                  className="btn btn-primary text-white float-right"
                   onClick={this.clearFilter}
                 >
                   Clear
-                </button>         
-              </div> 
+                </button>
+              </div>
             </div>
           </AriaModal>
         }
-        
+
       </div>
-    )   
+    )
   }
 
   componentDidMount(){
-    fetch("/groups.json")
+    fetch("/groups.json?shallow=true")
       .then(res => res.json())
       .then(
-        (res) => { 
+        (res) => {
           this.setState({groups: Object.values(res)});
         },
         (error) => {
           this.setState({
-            error:error 
+            error:error
           });
         }
       );
@@ -222,12 +222,12 @@ class GroupFilter extends React.Component {
     fetch("/person_groups/all_roles.json")
       .then(res => res.json())
       .then(
-        (res) => { 
+        (res) => {
           this.setState({roles: Object.values(res)});
         },
         (error) => {
           this.setState({
-            error:error 
+            error:error
           });
         }
       );

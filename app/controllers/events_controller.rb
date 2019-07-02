@@ -1,9 +1,13 @@
 class EventsController < ApplicationController
   before_action :set_event, only: [:update, :destroy]
+  before_action :check_authorization
 
   # GET /events
   def index
-    @events = Event.all.map{|m| [m.id, m.with_associations] }.to_h
+    @events = Event.all.map{|m|
+      [m.id, (params[:shallow] ? m : m.with_associations)]
+    }.to_h
+
     respond_to do |format|
       format.html { render :action => "index" }
       format.json { render :json => @events}
@@ -56,5 +60,9 @@ class EventsController < ApplicationController
     # Only allow a trusted parameter "white list" through.
     def event_params
       params.require(:event).permit(:name, :description, :date, :event_category_id, {:tags => []})
+    end
+
+    def check_authorization
+      authorize Event
     end
 end

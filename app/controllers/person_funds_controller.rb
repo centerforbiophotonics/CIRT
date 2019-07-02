@@ -1,5 +1,6 @@
 class PersonFundsController < ApplicationController
   before_action :set_person_fund, only: [:update, :destroy]
+  before_action :check_authorization
 
   # GET /person_funds
   def index
@@ -51,5 +52,9 @@ class PersonFundsController < ApplicationController
     # Only allow a trusted parameter "white list" through.
     def person_fund_params
       params.require(:person_fund).permit(:person_id, :fund_id)
+    end
+
+    def check_authorization
+      authorize PersonFund
     end
 end

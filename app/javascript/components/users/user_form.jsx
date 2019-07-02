@@ -1,10 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import Select from 'react-select';
 
 class UserForm extends React.Component {
   static propTypes = {
     /** @type {string} A string to indicate if the form is being used to update or create a model instance. Must be equal to "update" or "create". */
-    action: PropTypes.string, 
+    action: PropTypes.string,
     /** @type {string} The record to edit. If creating a new instance this prop is not required and the new instance will be created using defaults returned from the defaults method. */
     user: PropTypes.object,
     /** @type {object} The attributes of the user who requested the page. */
@@ -21,9 +22,9 @@ class UserForm extends React.Component {
     user: {}
   };
 
-  /** 
-   * The constructor lifecycle method. 
-   * @param {object} props - The component's props 
+  /**
+   * The constructor lifecycle method.
+   * @param {object} props - The component's props
    * @public
    */
   constructor(props){
@@ -50,53 +51,67 @@ class UserForm extends React.Component {
 
   }
 
-  /** 
-   * A keypress event handler for all form inputs that sets the corresponding state variable using the inputs name attribute.  
+  /**
+   * A keypress or change event handler for all form inputs that sets the corresponding state variable using the inputs name attribute.
    * @public
    */
-  handleChange(e){
-    if (e.isDefaultPrevented != null && e.isDefaultPrevented() == false)
-      e.preventDefault();
+   handleChange(e){
+     if (e.isDefaultPrevented != null && e.isDefaultPrevented() == false && (e.target === undefined || e.target.type !== 'checkbox'))
+       e.preventDefault();
 
-    const name = e.target.name;
-    const value = e.target.value;
+     let name = null;
+     let value = null;
 
-    this.setState(prevState => {
-      prevState.user[name] = value;
-      return prevState;
-    });
-  }
+     if (Array.isArray(e)){
+       name = "roles"
+       value = e.map(v => v.value);
+     } else if (e.target.type === 'checkbox') {
+       console.log("checkbox")
+       name = e.target.name;
+       value = !this.state.user[name];
+     } else {
+       name = e.target.name;
+       value = e.target.value;
+     }
 
-  /** 
-   * A click event handler that sends an AJAX call to delete the record.  
+     this.setState(prevState => {
+       prevState.user[name] = value;
+       return prevState;
+     });
+   }
+
+  /**
+   * A click event handler that sends an AJAX call to delete the record.
    * @public
    */
   handleDelete(e){
     if (e.isDefaultPrevented != null && e.isDefaultPrevented() == false)
       e.preventDefault();
-    
-    fetch("/users/"+this.props.user.id, {
-      method: 'DELETE',
-      headers: this.headers,
-      credentials: 'include'
-    }).then(res => res.json())
-      .then(this.props.handleDelete,
-        (error) => {
-          this.setState({
-            error:error 
-          });
-        }
-      )
+
+    if (confirm("Are you sure you want to delete this user? It's usually better to revoke their access by giving them the role 'no_access'.")){
+      fetch("/users/"+this.props.user.id, {
+        method: 'DELETE',
+        headers: this.headers,
+        credentials: 'include'
+      }).then(res => res.json())
+        .then(this.props.handleDelete,
+          (error) => {
+            this.setState({
+              error:error
+            });
+          }
+        )
+    }
   }
 
-  /** 
-   * A click event handler that sends an AJAX call to update or create the record.  
+  /**
+   * A click event handler that sends an AJAX call to update or create the record.
    * @public
    */
   handleSubmit(e){
     if (e.isDefaultPrevented != null && e.isDefaultPrevented() == false)
       e.preventDefault();
-    
+
     if (this.props.action == "create"){
       fetch('/users',{
         method: 'POST',
@@ -107,7 +122,7 @@ class UserForm extends React.Component {
         .then(this.props.handleNew,
           (error) => {
             this.setState({
-              error:error 
+              error:error
             });
           }
         )
@@ -121,11 +136,11 @@ class UserForm extends React.Component {
         .then(this.props.handleUpdate,
           (error) => {
             this.setState({
-              error:error 
+              error:error
             });
           }
         )
-    } 
+    }
   }
 
   /**
@@ -148,7 +163,7 @@ class UserForm extends React.Component {
       name: "",
       email: "",
       cas_user: "",
-      roles: ""
+      roles: []
     }
   }
 
@@ -181,7 +196,7 @@ class UserForm extends React.Component {
       button_text = "Create";
     } else if (this.props.action == "update"){
       button_text = "Update";
-    } 
+    }
 
     let title = null;
     if (this.props.action == "create"){
@@ -193,11 +208,11 @@ class UserForm extends React.Component {
     let buttons = (
       <div className="form-actions">
         <a className="btn btn-danger text-white" onClick={this.handleSubmit} disabled={!this.valid()}>{button_text}</a>
-        {this.props.action == "update" ? 
+        {this.props.action == "update" ?
           <a className="btn btn-danger text-white ml-3" onClick={this.handleDelete} disabled={!this.valid()}>Delete</a>
           : null
         }
-        <a className="btn btn-danger text-white ml-3" onClick={this.props.handleFormToggle}>Cancel</a>         
+        <a className="btn btn-danger text-white ml-3" onClick={this.props.handleFormToggle}>Cancel</a>
       </div>
     )
 
@@ -226,13 +241,26 @@ class UserForm extends React.Component {
             </div>
 
             <div className="form-group">
-              <label htmlFor="roles" className="font-weight-bold">Roles</label>
-              <input type="text" className="form-control" id="roles" name="roles" aria-describedby="roles_help" value={user.roles} placeholder="Enter Roles" onChange={this.handleChange}/>
-              <small id="roles_help" className="form-text text-muted">Help text placeholder.</small>
-            </div>
+                <label
+                  htmlFor="roles"
+                  className="font-weight-bold"
+                >
+                  Roles
+                </label>
+                <Select
+                  type="text"
+                  id="roles"
+                  name="roles"
+                  value={user.roles.map(r => ({value: r, label: r}))  }
+                  isMulti={true}
+                  options={this.props.role_list.map(r => ({value: r, label: r}))}
+                  placeholder="No Roles Assigned (no access)"
+                  onChange={this.handleChange}
+                />
+              </div>
 
             {buttons}
-            
+
           </div>
         </div>
       </div>

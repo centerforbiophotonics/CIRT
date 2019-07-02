@@ -1,0 +1,17 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  description: MyString
+  dates: MyString
+  consultants: MyString
+  minutes: MyString
+  consultation_category: one
+  ccrc_id: 1
+
+two:
+  description: MyString
+  dates: MyString
+  consultants: MyString
+  minutes: MyString
+  consultation_category: two
+  ccrc_id: 1

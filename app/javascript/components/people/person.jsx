@@ -13,6 +13,8 @@ import Event from '../events/event';
 import PersonGroups from '../person_groups/person_groups';
 import PersonFunds from '../person_funds/person_funds';
 import PersonEvents from '../person_events/person_events';
+import PersonConsultations from '../person_consultations/person_consultations';
+import PersonScantronAppointments from '../person_scantron_appointments/person_scantron_appointments';
 
 /**
  * Bootstrap card showing all the details of a person and its associated models.
@@ -27,9 +29,9 @@ class Person extends React.Component {
     close: PropTypes.func,
   }
 
-  /** 
-   * The constructor lifecycle method. 
-   * @param {object} props - The component's props 
+  /**
+   * The constructor lifecycle method.
+   * @param {object} props - The component's props
    * @public
    */
   constructor(props){
@@ -58,7 +60,7 @@ class Person extends React.Component {
     this.setState({showing_event: null});
   }
 
-  /** 
+  /**
    * The render lifecycle method.
    * @public
    */
@@ -75,16 +77,16 @@ class Person extends React.Component {
       <div className="card mb-3" id={"person_"+person.id}>
         <div className="card-body">
           {buttons}
-          
+
           <h3 className="card-title">{person.name}</h3>
           <div className="ml-3">
             <div className="row">
               <div className="col-md-4">
                 <p><strong>Name: </strong>{person.name}</p>
                 <p><strong>Email: </strong>{person.email}</p>
-                <a 
-                  className="btn btn-secondary text-white" 
-                  target="_blank" 
+                <a
+                  className="btn btn-secondary text-white"
+                  target="_blank"
                   href={
                     "http://directory.ucdavis.edu/search/directory_results.shtml?filter="+
                     encodeURIComponent(person.name)
@@ -117,7 +119,7 @@ class Person extends React.Component {
                 }
               </div>
             </div>
-            
+
             <div className="mt-3">
               <ul className="nav nav-tabs" id="myTab" role="tablist">
                 <li className="nav-item">
@@ -135,6 +137,16 @@ class Person extends React.Component {
                     Events ({Object.keys(person.person_events).length})
                   </a>
                 </li>
+                <li className="nav-item">
+                  <a className="nav-link" id="consultations-tab" data-toggle="tab" href="#consultations" role="tab" aria-controls="consultations" aria-selected="false">
+                    Consultations ({Object.keys(person.person_consultations).length})
+                  </a>
+                </li>
+                <li className="nav-item">
+                  <a className="nav-link" id="scantron_appointments-tab" data-toggle="tab" href="#scantron_appointments" role="tab" aria-controls="scantron_appointments" aria-selected="false">
+                    Scantron Appointments ({Object.keys(person.person_scantron_appointments).length})
+                  </a>
+                </li>
               </ul>
               <div className="tab-content" id="myTabContent">
                 <div className="tab-pane fade show active" id="groups" role="tabpanel" aria-labelledby="groups-tab">
@@ -142,6 +154,7 @@ class Person extends React.Component {
                     person_groups={person.person_groups}
                     parent_model="Person"
                     parent={person}
+                    current_user={this.props.current_user}
                     defaultPageSize={5}
                     readOnly={true}
                   />
@@ -151,27 +164,49 @@ class Person extends React.Component {
                     person_funds={person.person_funds}
                     parent_model="Person"
                     parent={person}
+                    current_user={this.props.current_user}
                     defaultPageSize={5}
                     readOnly={true}
                   />
                 </div>
-                <div className="tab-pane fade" id="events" role="tabpanel" aria-labelledby="funds-tab">
+                <div className="tab-pane fade" id="events" role="tabpanel" aria-labelledby="events-tab">
                   <PersonEvents
                     person_events={person.person_events}
                     parent_model="Person"
                     parent={person}
+                    current_user={this.props.current_user}
                     defaultPageSize={5}
                     readOnly={true}
                   />
                 </div>
-              </div>  
+                <div className="tab-pane fade" id="consultations" role="tabpanel" aria-labelledby="consultations-tab">
+                  <PersonConsultations
+                    person_consultations={person.person_consultations}
+                    parent_model="Person"
+                    parent={person}
+                    current_user={this.props.current_user}
+                    defaultPageSize={5}
+                    readOnly={true}
+                  />
+                </div>
+                <div className="tab-pane fade" id="scantron_appointments" role="tabpanel" aria-labelledby="scantron_appointments-tab">
+                  <PersonScantronAppointments
+                    person_scantron_appointments={person.person_scantron_appointments}
+                    parent_model="Person"
+                    parent={person}
+                    current_user={this.props.current_user}
+                    defaultPageSize={5}
+                    readOnly={true}
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
 
         </div>
       </div>
-    )   
+    )
   }
 }
 

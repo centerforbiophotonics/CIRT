@@ -18,9 +18,9 @@ class PeopleMerger extends React.Component {
     /** Tells the parent which person was updated and how and which was deleted. */
   };
 
-  /** 
-   * The constructor lifecycle method. 
-   * @param {object} props - The component's props 
+  /**
+   * The constructor lifecycle method.
+   * @param {object} props - The component's props
    * @public
    */
   constructor(props){
@@ -31,7 +31,16 @@ class PeopleMerger extends React.Component {
     this.renderAttributeRow = this.renderAttributeRow.bind(this);
     this.renderAssociationRow = this.renderAssociationRow.bind(this);
 
-    this.hiddenAttributes = ["created_at", "updated_at", "id", "person_events", "person_groups", "person_funds"]
+    this.hiddenAttributes = [
+      "created_at",
+      "updated_at",
+      "id",
+      "person_events",
+      "person_groups",
+      "person_funds",
+      "person_consultations",
+      "person_scantron_appointments"
+    ]
 
     this.state = {
       keep: {}
@@ -48,12 +57,12 @@ class PeopleMerger extends React.Component {
   }
 
 
-  /** 
+  /**
    * Click handler to switch which record is kept and which is deleted.
    * @public
    */
   toggleKeep(attr){
-    
+
     this.setState(prevState => {
       prevState.keep[attr] = (prevState.keep[attr] === 0 ? 1 : 0)
 
@@ -61,15 +70,15 @@ class PeopleMerger extends React.Component {
     });
   }
 
-  /**  
+  /**
    * Makes server calls to merge the data and then calls the update method passed to it from the parent component.
    * @public
    */
   merge(){
     const p1 = this.props.people[0];
     const p2 = this.props.people[1];
-    
-    let person_data = {}; 
+
+    let person_data = {};
     Object.keys(p1).forEach(attr => {
       if (!this.hiddenAttributes.includes(attr)){
         person_data[attr] = (this.props.people[this.state.keep[attr]][attr])
@@ -103,12 +112,12 @@ class PeopleMerger extends React.Component {
       })
       .catch((error) => {
         this.setState({
-          error:error 
+          error:error
         });
       });
   }
 
-  /** 
+  /**
    * Renders a row containing the specified attribute for both people and buttons to select the one to keep.
    * @public
    */
@@ -117,20 +126,20 @@ class PeopleMerger extends React.Component {
     const p2 = this.props.people[1];
 
     return (
-      <div className="row border-bottom" key={attr}> 
+      <div className="row border-bottom" key={attr}>
         <div className="col-md-2">
-          {this.state.keep[attr] === 0 ? 
+          {this.state.keep[attr] === 0 ?
             <a className="btn btn-success text-white my-1 mr-2" onClick={() => this.toggleKeep(attr)}>
               <FontAwesomeIcon icon="check"/>
             </a>
-            : 
+            :
             <a className="btn btn-danger text-white my-1 mr-2" onClick={() => this.toggleKeep(attr)}>
               <FontAwesomeIcon icon="trash-alt"/>
             </a>
           }
           <strong>{attr}:</strong>
         </div>
-        
+
         <div className="col-md-4">
           <p className="m-0" style={{lineHeight:"35px"}}>
             {p1[attr] !== null ? p1[attr].toString() : null}
@@ -138,11 +147,11 @@ class PeopleMerger extends React.Component {
         </div>
 
         <div className="col-md-2">
-          {this.state.keep[attr] === 1 ? 
+          {this.state.keep[attr] === 1 ?
             <a className="btn btn-success text-white my-1 mr-2" onClick={() => this.toggleKeep(attr)}>
               <FontAwesomeIcon icon="check"/>
             </a>
-            : 
+            :
             <a className="btn btn-danger text-white my-1 mr-2" onClick={() => this.toggleKeep(attr)}>
               <FontAwesomeIcon icon="trash-alt"/>
             </a>
@@ -153,8 +162,8 @@ class PeopleMerger extends React.Component {
         <div className="col-md-4">
           <p className="m-0" style={{lineHeight:"35px"}}>
             {p2[attr] !== null ? p2[attr].toString() : null}
-          </p> 
-        </div> 
+          </p>
+        </div>
       </div>
     )
   }
@@ -164,15 +173,15 @@ class PeopleMerger extends React.Component {
     const p2 = this.props.people[1];
 
     return (
-      <div className="row" key={assoc}> 
-        
+      <div className="row" key={assoc}>
+
         <div className="col-md-4 offset-md-2">
           {Object.keys(p1[assoc]).length} {assoc.replace("person_","")}
         </div>
 
         <div className="col-md-4 offset-md-2">
           {Object.keys(p2[assoc]).length} {assoc.replace("person_","")}
-        </div>  
+        </div>
       </div>
     )
   }
@@ -191,38 +200,38 @@ class PeopleMerger extends React.Component {
           </div>
           <div className="row justify-content-center">
             <p>
-              Select the attributes below to use in the new record.  
+              Select the attributes below to use in the new record.
             </p>
           </div>
 
-          
+
           {Object.keys(this.props.people[0]).map(attr => {
             if (this.hiddenAttributes.includes(attr)) return null;
             return this.renderAttributeRow(attr);
           })}
 
-          {["person_events","person_groups","person_funds"].map(assoc => {
+          {["person_events","person_groups","person_funds","person_consultations","person_scantron_appointments"].map(assoc => {
             return this.renderAssociationRow(assoc)
           })}
 
-          <button 
-            type="button" 
-            className="btn btn-secondary text-white mt-3" 
+          <button
+            type="button"
+            className="btn btn-secondary text-white mt-3"
             onClick={this.props.close}
           >
             Cancel
-          </button> 
-          
-          <button 
-            type="button" 
-            className="btn btn-danger text-white mt-3 float-right" 
+          </button>
+
+          <button
+            type="button"
+            className="btn btn-danger text-white mt-3 float-right"
             onClick={()=> {
               if (confirm("Are you sure you want to merge these two records?"))
                 this.merge();
             }}
           >
             Merge
-          </button> 
+          </button>
         </div>
       </div>
     )

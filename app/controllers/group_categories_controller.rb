@@ -1,5 +1,6 @@
 class GroupCategoriesController < ApplicationController
   before_action :set_group_category, only: [:update, :destroy]
+  before_action :check_authorization
 
   # GET /group_categories
   def index
@@ -52,5 +53,9 @@ class GroupCategoriesController < ApplicationController
     # Only allow a trusted parameter "white list" through.
     def group_category_params
       params.require(:group_category).permit(:name, :description)
+    end
+
+    def check_authorization
+      authorize GroupCategory
     end
 end

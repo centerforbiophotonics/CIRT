@@ -13,13 +13,13 @@ import PersonGroup from './person_group';
 import PersonGroupForm from './person_group_form';
 
 /**
- * User interface for listing, filtering and exporting Person Groups. Renders subcomponents for CRUD actions. Can be used a root component or rendered from the form or show component of an associated model. 
+ * User interface for listing, filtering and exporting Person Groups. Renders subcomponents for CRUD actions. Can be used a root component or rendered from the form or show component of an associated model.
  */
 class PersonGroups extends React.Component {
   static propTypes = {
-    /** A hash of person_group ids to objects containing their attributes and associated models' attributes. */
+    /** @type {object} A hash of person_group ids to objects containing their attributes and associated models' attributes. */
     person_groups: PropTypes.object,
-    /** @type {function} The user who requested the page. The users roles array can be used for authorization. */
+    /** @type {object} The user who requested the page. The users roles array can be used for authorization. */
     current_user: PropTypes.object,
     /** @type {function} If this component is used by another to display its associations it can provide a handler which this component will call to update the parent state after it has changed. */
     handleUpdate: PropTypes.func,
@@ -27,7 +27,7 @@ class PersonGroups extends React.Component {
     parent_model: PropTypes.string,
     /** @type {object} The parent object these records belong to. */
     parent: PropTypes.object,
-    /** @type {number} Passed to ReactTable to set the initial number of rows per page */
+    /** @type {number} Passed to ReactTable to set the initial number of rows per page. */
     defaultPageSize: PropTypes.number,
     /** @type {boolean} Whether to show edit buttons and forms. */
     readOnly: PropTypes.bool
@@ -37,14 +37,14 @@ class PersonGroups extends React.Component {
     defaultPageSize: 100
   };
 
-  /** 
-   * The constructor lifecycle method. 
-   * @param {object} props - The component's props 
+  /**
+   * The constructor lifecycle method.
+   * @param {object} props - The component's props
    * @public
    */
   constructor(props){
     super(props);
-        
+
     this.toggleAdd = this.toggleAdd.bind(this);
     this.add = this.add.bind(this);
     this.toggleUpdate = this.toggleUpdate.bind(this);
@@ -72,14 +72,14 @@ class PersonGroups extends React.Component {
     };
   }
 
-  /** 
-   * Click handler that toggles the add menu and hides the show and edit components. 
+  /**
+   * Click handler that toggles the add menu and hides the show and edit components.
    * @public
    */
   toggleAdd(e){
     if (e.isDefaultPrevented != null && e.isDefaultPrevented() === false)
       e.preventDefault();
-    
+
     this.setState(prevState => ({
       adding: !prevState.adding,
       editing: false,
@@ -89,8 +89,8 @@ class PersonGroups extends React.Component {
     this.backToTop();
   }
 
-  /** 
-   * Handler invoked after a form succeeds in adding a new model instance to update the client state. 
+  /**
+   * Handler invoked after a form succeeds in adding a new model instance to update the client state.
    * @param {object} person_group - The model instance to add to the current state.
    * @public
    */
@@ -102,8 +102,8 @@ class PersonGroups extends React.Component {
     });
   }
 
-  /** 
-   * Click handler that toggles the edit menu and hides the show and add components. 
+  /**
+   * Click handler that toggles the edit menu and hides the show and add components.
    * @public
    */
   toggleUpdate(e,d){
@@ -120,8 +120,8 @@ class PersonGroups extends React.Component {
     this.backToTop();
   }
 
-  /** 
-   * Handler invoked after a form succeeds in editing a model instance to update the client state. 
+  /**
+   * Handler invoked after a form succeeds in editing a model instance to update the client state.
    * @param {object} person_group - The updated model instance replace in the current state.
    * @public
    */
@@ -134,8 +134,8 @@ class PersonGroups extends React.Component {
     });
   }
 
-  /** 
-   * Click handler that toggles the show component and hides the edit and add components. 
+  /**
+   * Click handler that toggles the show component and hides the edit and add components.
    * @public
    */
   toggleShow(e,d){
@@ -152,8 +152,8 @@ class PersonGroups extends React.Component {
     this.backToTop();
   }
 
-  /** 
-   * Handler invoked after a form succeeds in deleting a model instance to update the client state. 
+  /**
+   * Handler invoked after a form succeeds in deleting a model instance to update the client state.
    * @param {object} person_group - The deleted model instance remove from the current state.
    * @public
    */
@@ -175,25 +175,25 @@ class PersonGroups extends React.Component {
     let columns = [];
 
     if (this.props.parent_model != "Person"){
-      columns.push({ Header: 'Person', accessor: d => d.person.name, id: 'personName' },);
+      columns.push({ Header: 'Person', accessor: d => d.person.name, id: 'personName' });
     }
 
     if (this.props.parent_model != "Group"){
-      columns.push({ Header: 'Group', accessor: d => d.group.name, id: 'groupName' },);
+      columns.push({ Header: 'Group', accessor: d => d.group.name, id: 'groupName' });
 
-    } 
+    }
 
     columns = columns.concat([
       { Header: 'Role', accessor: 'role' },
       { Header: 'Start', accessor: 'start' },
       { Header: 'End', accessor: 'end' },
-      { 
+      {
         Header: 'Actions',
         Cell: d => {
           return (
             <div>
               <a className="btn btn-sm btn-secondary text-white" onClick={(e)=>{this.toggleShow(e,d)}}><FontAwesomeIcon icon="eye"/></a>
-              {!this.props.readOnly &&
+              {(!this.props.readOnly && this.props.current_user.roles.includes("edit")) &&
                 <a className="btn btn-sm btn-secondary text-white ml-1" onClick={(e)=>{this.toggleUpdate(e,d)}}><FontAwesomeIcon icon="pen"/></a>
               }
             </div>
@@ -209,8 +209,8 @@ class PersonGroups extends React.Component {
     return columns;
   }
 
-  /** 
-   * Scrolls the window to the top of the page. 
+  /**
+   * Scrolls the window to the top of the page.
    * @public
    */
   backToTop(e){
@@ -234,40 +234,38 @@ class PersonGroups extends React.Component {
     if (this.reactTable)
       this.setState({export_data: this.reactTable.getResolvedState().sortedData.map((r)=> r._original)});
   }
-     
-  /** 
+
+  /**
    * The render lifecycle method.
    * @public
    */
   render(){
-    let top_content = null
+    let top_content =  ( this.props.current_user.roles.includes("edit") &&
+      <a className="btn btn-secondary text-white mb-3" onClick={this.toggleAdd}><FontAwesomeIcon icon="plus"/> Add</a>
+    );
 
-    if (this.readOnly === false){
-     top_content = <a className="btn btn-secondary text-white mb-3" onClick={this.toggleAdd}><FontAwesomeIcon icon="plus"/></a>;
-    }
-    
     if (this.state.adding){
-      top_content = <PersonGroupForm 
-        action="create" 
+      top_content = <PersonGroupForm
+        action="create"
         current_user={this.props.current_user}
-        handleNew={this.add}
-        handleFormToggle={this.toggleAdd}
         parent_model={this.props.parent_model}
         parent={this.props.parent}
+        handleNew={this.add}
+        handleFormToggle={this.toggleAdd}
       />
     } else if (this.state.editing){
-      top_content = <PersonGroupForm 
-        action="update" 
-        person_group={this.state.selected} 
+      top_content = <PersonGroupForm
+        action="update"
+        person_group={this.state.selected}
         current_user={this.props.current_user}
-        handleUpdate={this.update} 
+        handleUpdate={this.update}
         handleDelete={this.delete}
         handleFormToggle={this.toggleUpdate}
         parent_model={this.props.parent_model}
         parent={this.props.parent}
       />
     } else if (this.state.showing){
-      top_content = <PersonGroup 
+      top_content = <PersonGroup
         person_group={this.state.selected}
         current_user={this.props.current_user}
         close={this.toggleShow}
@@ -276,10 +274,10 @@ class PersonGroups extends React.Component {
 
     return (
       <div className="person_groups col-md-12 p-0">
-        <a className="btn btn-secondary text-white btn-sm" id="back-to-top" onClick={this.backToTop}><FontAwesomeIcon icon="arrow-up"/></a> 
+        <a className="btn btn-secondary text-white btn-sm" id="back-to-top" onClick={this.backToTop}><FontAwesomeIcon icon="arrow-up"/></a>
         <div className="card">
           <h2 className="card-title text-center mt-3">
-            {this.props.parent && this.props.parent.name ? this.props.parent.name : null} Group Associations    
+            {this.props.parent && this.props.parent.name ? this.props.parent.name : null} Group Associations
           </h2>
 
           <h4 className="text-center">
@@ -289,8 +287,8 @@ class PersonGroups extends React.Component {
           <div className="card-body">
             {top_content}
 
-            <CSVLink 
-              data={this.state.export_data} 
+            <CSVLink
+              data={this.state.export_data}
               className="btn btn-secondary text-white mb-3 ml-1"
               filename="CIRT_group_associations_export.csv"
             >
@@ -313,13 +311,13 @@ class PersonGroups extends React.Component {
     );
   }
 
-  /** 
-   * The componentDidMount lifecycle method. Registers an window scroll listener that shows/hides the back-to-top button 
+  /**
+   * The componentDidMount lifecycle method. Registers an window scroll listener that shows/hides the back-to-top button
    * @public
    */
-  componentDidMount(){  
+  componentDidMount(){
     var buttonScrollThreshold = 177;
-    
+
     window.onscroll = function() {
       if (document.body.scrollTop > buttonScrollThreshold || document.documentElement.scrollTop > buttonScrollThreshold) {
         document.getElementById("back-to-top").style.display = "block";
@@ -332,11 +330,11 @@ class PersonGroups extends React.Component {
   }
 
   /**
-   * The componentWillReceiveProps lifecycle method. 
-   * Because the records stored in the state are initially set from a prop, 
-   * if the prop is updated this ensures the state is updated as well. 
-   * This will happen when this component is not the root, 
-   * but is rendered by another component to display its associated model attributes. 
+   * The componentWillReceiveProps lifecycle method.
+   * Because the records stored in the state are initially set from a prop,
+   * if the prop is updated this ensures the state is updated as well.
+   * This will happen when this component is not the root,
+   * but is rendered by another component to display its associated model attributes.
    * @public
    */
   componentWillReceiveProps(nextProps) {

@@ -1,9 +1,13 @@
 class FundsController < ApplicationController
   before_action :set_fund, only: [:update, :destroy]
+  before_action :check_authorization
 
   # GET /funds
   def index
-    @funds = Fund.all.map{|m| [m.id, m.with_associations] }.to_h
+    @funds = Fund.all.map{|m|
+      [m.id, (params[:shallow] ? m : m.with_associations)]
+    }.to_h
+
     respond_to do |format|
       format.html { render :action => "index" }
       format.json { render :json => @fundsx}
@@ -56,5 +60,9 @@ class FundsController < ApplicationController
     # Only allow a trusted parameter "white list" through.
     def fund_params
       params.require(:fund).permit(:person_id, :amount, :name, :description, :date, :external, :source)
+    end
+
+    def check_authorization
+      authorize Fund
     end
 end

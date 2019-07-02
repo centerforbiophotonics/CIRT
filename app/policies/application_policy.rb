@@ -7,31 +7,23 @@ class ApplicationPolicy
   end
 
   def index?
-    false
-  end
-
-  def show?
-    false
+    @user.has_role?("view") && !@user.has_role?("no_access")
   end
 
   def create?
-    false
-  end
-
-  def new?
-    create?
+    @user.has_role?("edit") && !@user.has_role?("no_access")
   end
 
   def update?
-    false
-  end
-
-  def edit?
-    update?
+    @user.has_role?("edit") && !@user.has_role?("no_access")
   end
 
   def destroy?
-    false
+    @user.has_role?("edit") && !@user.has_role?("no_access")
+  end
+
+  def search?
+    @user.has_role?("view") && !@user.has_role?("no_access")
   end
 
   class Scope
@@ -46,4 +38,44 @@ class ApplicationPolicy
       scope.all
     end
   end
+end
+
+class ConsultationPolicy < ApplicationPolicy
+end
+
+class ConsultationCategoryPolicy < ApplicationPolicy
+end
+
+class EventCategoryPolicy < ApplicationPolicy
+end
+
+class EventPolicy < ApplicationPolicy
+end
+
+class FundPolicy < ApplicationPolicy
+end
+
+class GroupCategoryPolicy < ApplicationPolicy
+end
+
+class GroupPolicy < ApplicationPolicy
+end
+
+class PersonConsultationPolicy < ApplicationPolicy
+end
+
+class PersonEventPolicy < ApplicationPolicy
+end
+
+class PersonFundPolicy < ApplicationPolicy
+end
+
+
+class PersonScantronAppointmentPolicy < ApplicationPolicy
+end
+
+class RolePolicy < ApplicationPolicy
+end
+
+class ScantronAppointmentPolicy < ApplicationPolicy
 end

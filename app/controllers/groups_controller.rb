@@ -1,9 +1,13 @@
 class GroupsController < ApplicationController
   before_action :set_group, only: [:update, :destroy]
+  before_action :check_authorization
 
   # GET /groups
   def index
-    @groups = Group.order(:name).all.map{|m| [m.id, m.with_associations] }.to_h
+    @groups = Group.order(:name).all.map{|m|
+      [m.id, (params[:shallow] ? m : m.with_associations)]
+    }.to_h
+
     respond_to do |format|
       format.html { render :action => "index" }
       format.json { render :json => @groups }
@@ -53,6 +57,10 @@ class GroupsController < ApplicationController
 
     # Only allow a trusted parameter "white list" through.
     def group_params
-      params.require(:group).permit(:name, :description, :group_category_id)
+      params.require(:group).permit(:name, :description, :group_category_id, :parent_id)
+    end
+
+    def check_authorization
+      authorize Group
     end
 end

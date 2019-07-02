@@ -1,15 +1,19 @@
 class PeopleController < ApplicationController
   before_action :set_person, only: [:update, :destroy, :iam_lookup]
+  before_action :check_authorization
 
   # GET /people
   def index
-    @people = Person.all.map{|m| [m.id, m.with_associations] }.to_h
+    @people = Person.first(10).map{|m|
+      [m.id, (params[:shallow] ? m : m.with_associations)]
+    }.to_h
+
     respond_to do |format|
       format.html { render :action => "index" }
       format.json { render :json => @people}
     end
   end
-  
+
   # POST /people
   def create
     @person = Person.new(person_params)
@@ -38,7 +42,7 @@ class PeopleController < ApplicationController
   # GET /people/search
   def search
     ActiveRecord::Base.connection.execute("SELECT set_limit(0.20);")
-    
+
     results = Person.fuzzy_search(:name => params[:search_text]).
       limit(10).
       map{|p| p.with_associations}
@@ -68,6 +72,16 @@ class PeopleController < ApplicationController
     PersonFund.where(:person_id => params[:person2]).each do |pf|
       pf.person_id = params[:person1]
       pf.save!
+    end
+
+    PersonConsultation.where(:person_id => params[:person2]).each do |pc|
+      pc.person_id = params[:person1]
+      pc.save!
+    end
+
+    PersonScantronAppointment.where(:person_id => params[:person2]).each do |ps|
+      ps.person_id = params[:person1]
+      ps.save!
     end
 
     render :json => person1.with_associations
@@ -101,7 +115,7 @@ class PeopleController < ApplicationController
     people = people.pluck(:id).sort!
 
     event_totals = {}
-    
+
     Person.all.pluck(:id).each do |p_id|
       event_totals[p_id] = 0
     end
@@ -113,7 +127,7 @@ class PeopleController < ApplicationController
     filtered_people = []
     number = params[:number].to_i
 
-    event_totals.each do |id, count| 
+    event_totals.each do |id, count|
       if params[:comparator] == "="
         if count == number
           filtered_people << id
@@ -144,15 +158,15 @@ class PeopleController < ApplicationController
     groups = params[:groups].split(",")
     roles = params[:roles].split(",")
 
-    if 
+    if
       groups.length == 0 &&
       roles.length == 0
 
       render :json => Person.all.pluck(:id)
     else
       people = Person.where(
-        "person_groups.group_id in (?) or person_groups.role in (?)", 
-        params[:groups].split(","), 
+        "person_groups.group_id in (?) or person_groups.role in (?)",
+        params[:groups].split(","),
         params[:roles].split(",")
       )
 
@@ -161,7 +175,7 @@ class PeopleController < ApplicationController
   end
 
   private
-     
+
     # Use callbacks to share common setup or constraints between actions.
     def set_person
       @person = Person.find(params[:id])
@@ -170,5 +184,9 @@ class PeopleController < ApplicationController
     # Only allow a trusted parameter "white list" through.
     def person_params
       params.require(:person).permit(:name, :email, :pidm, :sid, :emp_id, :iam_id, :cas_user, :dems_id, :cims_id, :lms_id, :additional_emails)
+    end
+
+    def check_authorization
+      authorize Person
     end
 end

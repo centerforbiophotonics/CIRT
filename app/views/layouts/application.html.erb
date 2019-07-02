@@ -15,41 +15,167 @@
   </head>
 
   <body>
-    <ul class="nav justify-content-center">
-      <li class="nav-item">
-        <a class="nav-link" href="<%= people_path%>">People</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="<%= person_groups_path%>">Person Group Associations</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="<%= roles_path%>">Roles</a>
-      </li
-      <li class="nav-item">
-        <a class="nav-link" href="<%= person_events_path%>">Person Event Associations</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="<%= person_funds_path%>">Person Fund Associations</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="<%= groups_path%>">Groups</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="<%= group_categories_path%>">Group Categories</a>
-      </li> 
-      <li class="nav-item">
-        <a class="nav-link" href="<%= events_path%>">Events</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="<%= event_categories_path%>">Event Categories</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="<%= funds_path%>">Funds</a>
-      </li>
-    </ul>
 
-    <div class="col-md-10 offset-md-1" id="root">
-      <%= yield %>
+    <div class="container-fluid non-footer">
+      <div class="row page-header">
+        <div class="col-11 offset-1" style="height:100%; display: inline-block; vertical-align: middle; float: none;">
+          <a href="https://www.ucdavis.edu" title="UC Davis Home" rel="external" class="ucd_logo">
+            <img src="<%= image_path("ucd-logo.svg")%>" alt="UC Davis Home">
+          </a>
+          <a href="/" id="site_title">
+            <h1>CEE Interaction Reporting Tool</h1>
+          </a>
+
+          <% if Rails.env.development? %>
+            <div class="dev-controls">
+              <div class="col-md-4">
+                <p style="color:red;">DEV VERSION</p>
+              </div>
+
+              <div class="col-md-8">
+                <div style="margin:5px;">
+                  <form action="/set_user" method="post">
+
+                    <input name="authenticity_token" value="<%= form_authenticity_token %>" type="hidden">
+                    Set User:
+                    <input type="text" name="cas_user" style="width: 150px"value="<%= session[:cas_user] %>">
+                    <!-- <input type="submit" value="Submit"> -->
+                  </form>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <% unless current_user.roles.empty? || current_user.roles.include?("no_access") %>
+        <div class="row nav-bar">
+          <div class="col-md-1"></div>
+          <div class="col-md-11">
+            <ul class="nav">
+
+              <li class="nav-item">
+                <a class="nav-link" href="<%= people_path%>">People</a>
+              </li>
+
+              <li class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                  Groups<span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu">
+                  <li class="nav-item">
+                    <a class="nav-link" href="<%= groups_path%>">Groups</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="<%= group_categories_path%>">Group Categories</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="<%= person_groups_path%>">Person Group Associations</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="<%= roles_path%>">Roles</a>
+                  </li>
+                </ul>
+              </li>
+
+              <li class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                  Events<span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu">
+                  <li class="nav-item">
+                    <a class="nav-link" href="<%= events_path%>">Events</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="<%= event_categories_path%>">Event Categories</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="<%= person_events_path%>">Person Event Associations</a>
+                  </li>
+                </ul>
+              </li>
+
+              <li class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                  Consultations<span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu">
+                  <li class="nav-item">
+                    <a class="nav-link" href="<%= consultations_path%>">Consultations</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="<%= consultation_categories_path%>">Consultation Categories</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="<%= person_consultations_path%>">Person Consultation Associations</a>
+                  </li>
+                </ul>
+              </li>
+
+              <li class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                  Funds<span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu">
+                  <li class="nav-item">
+                    <a class="nav-link" href="<%= funds_path%>">Funds</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="<%= person_funds_path%>">Person Fund Associations</a>
+                  </li>
+                </ul>
+              </li>
+
+              <li class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                  Scantron<span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu">
+                  <li class="nav-item">
+                    <a class="nav-link" href="<%= scantron_appointments_path%>">Scantron Appointmens</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="<%= person_scantron_appointments_path%>">Person Scantron Apppointment Associations</a>
+                  </li>
+                </ul>
+              </li>
+
+              <% if current_user.has_role?("manage_users") %>
+                <li class="nav-item">
+                  <a class="nav-link" href="<%= users_path%>">Users</a>
+                </li>
+              <% end %>
+
+            </ul>
+          </div>
+        </div>
+      <% end %>
+
+      <div class="col-md-10 offset-md-1" id="root">
+        <%= yield %>
+      </div>
+
+      <div class="push"></div>
+    </div>
+
+    <div class="container-fluid footer-container">
+      <div class="row">
+        <div class='col-md-12' id='footer'>
+          <a href='https://cee.ucdavis.edu/' title='CEE Site'>CEE Site</a>
+          | Questions or comments? Contact <a href="mailto:cee@ucdavis.edu">cee@ucdavis.edu</a></p>
+          <p>Copyright © Regents of the University of California, Davis Campus, 2017 - <%= Date.today.year %>, All Rights Reserved</p>
+
+          <div class="logos">
+            <a href="https://cee.ucdavis.edu/">
+              <img src="<%= asset_path('CEElogo_web.png') %>">
+            </a>
+
+            <a href="https://ue.ucdavis.edu/">
+              <img src="<%= asset_path('ucd_undergraduate_education_logo.png')%>">
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
   </body>
 </html>

@@ -1,4 +1,29 @@
 Rails.application.routes.draw do
+  resources :person_scantron_appointments, only: [:index, :create, :update, :destroy] do
+    collection do
+      get :search
+    end
+  end
+  resources :scantron_appointments, only: [:index, :create, :update, :destroy] do
+    collection do
+      get :search
+    end
+  end
+  resources :consultations, only: [:index, :create, :update, :destroy] do
+    collection do
+      get :search
+    end
+  end
+  resources :person_consultations, only: [:index, :create, :update, :destroy] do
+    collection do
+      get :search
+    end
+  end
+  resources :consultation_categories, only: [:index, :create, :update, :destroy] do
+    collection do
+      get :search
+    end
+  end
   resources :roles, only: [:index, :create, :update, :destroy] do
     collection do
       get :search
@@ -52,7 +77,7 @@ Rails.application.routes.draw do
       get :search
     end
   end
-  
+
   root :to => "people#index"
 
   resources :people, only: [:index, :create, :update, :destroy] do
@@ -67,10 +92,14 @@ Rails.application.routes.draw do
       get :iam_lookup
     end
   end
-  
+
   resources :users, only: [:index, :create, :update, :destroy] do
     collection do
       get :search
     end
+  end
+
+  if Rails.env.development?
+    post "set_user", :to => "fake_user#set_user"
   end
 end

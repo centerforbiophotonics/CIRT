@@ -13,7 +13,7 @@ import PersonEvent from './person_event';
 import PersonEventForm from './person_event_form';
 
 /**
- * User interface for listing, filtering and exporting Person Events. Renders subcomponents for CRUD actions. Can be used a root component or rendered from the form or show component of an associated model. 
+ * User interface for listing, filtering and exporting Person Events. Renders subcomponents for CRUD actions. Can be used a root component or rendered from the form or show component of an associated model.
  */
 class PersonEvents extends React.Component {
   static propTypes = {
@@ -37,14 +37,14 @@ class PersonEvents extends React.Component {
     defaultPageSize: 100
   };
 
-  /** 
-   * The constructor lifecycle method. 
-   * @param {object} props - The component's props 
+  /**
+   * The constructor lifecycle method.
+   * @param {object} props - The component's props
    * @public
    */
   constructor(props){
     super(props);
-        
+
     this.toggleAdd = this.toggleAdd.bind(this);
     this.add = this.add.bind(this);
     this.toggleUpdate = this.toggleUpdate.bind(this);
@@ -72,14 +72,14 @@ class PersonEvents extends React.Component {
     };
   }
 
-  /** 
-   * Click handler that toggles the add menu and hides the show and edit components. 
+  /**
+   * Click handler that toggles the add menu and hides the show and edit components.
    * @public
    */
   toggleAdd(e){
     if (e.isDefaultPrevented != null && e.isDefaultPrevented() === false)
       e.preventDefault();
-    
+
     this.setState(prevState => ({
       adding: !prevState.adding,
       editing: false,
@@ -89,8 +89,8 @@ class PersonEvents extends React.Component {
     this.backToTop();
   }
 
-  /** 
-   * Handler invoked after a form succeeds in adding a new model instance to update the client state. 
+  /**
+   * Handler invoked after a form succeeds in adding a new model instance to update the client state.
    * @param {object} person_event - The model instance to add to the current state.
    * @public
    */
@@ -102,8 +102,8 @@ class PersonEvents extends React.Component {
     });
   }
 
-  /** 
-   * Click handler that toggles the edit menu and hides the show and add components. 
+  /**
+   * Click handler that toggles the edit menu and hides the show and add components.
    * @public
    */
   toggleUpdate(e,d){
@@ -120,8 +120,8 @@ class PersonEvents extends React.Component {
     this.backToTop();
   }
 
-  /** 
-   * Handler invoked after a form succeeds in editing a model instance to update the client state. 
+  /**
+   * Handler invoked after a form succeeds in editing a model instance to update the client state.
    * @param {object} person_event - The updated model instance replace in the current state.
    * @public
    */
@@ -134,8 +134,8 @@ class PersonEvents extends React.Component {
     });
   }
 
-  /** 
-   * Click handler that toggles the show component and hides the edit and add components. 
+  /**
+   * Click handler that toggles the show component and hides the edit and add components.
    * @public
    */
   toggleShow(e,d){
@@ -152,8 +152,8 @@ class PersonEvents extends React.Component {
     this.backToTop();
   }
 
-  /** 
-   * Handler invoked after a form succeeds in deleting a model instance to update the client state. 
+  /**
+   * Handler invoked after a form succeeds in deleting a model instance to update the client state.
    * @param {object} person_event - The deleted model instance remove from the current state.
    * @public
    */
@@ -179,26 +179,26 @@ class PersonEvents extends React.Component {
     }
 
     if (this.props.parent_model != "Event"){
-      columns.push({ 
-        Header: 'Event', 
-        accessor: d => d.event.name, 
-        id: 'eventName', 
-        width: 400, 
+      columns.push({
+        Header: 'Event',
+        accessor: d => d.event.name,
+        id: 'eventName',
+        width: 400,
         Cell: d => <div title={d.original.event.name}>{d.original.event.name}</div>
       });
       columns.push({ Header: 'Event Date', accessor: d => d.event.date, id: 'eventDate' });
       columns.push({ Header: 'Event Category', accessor: d => d.event.event_category.name, id: 'eventCategory' });
-    } 
+    }
 
     columns = columns.concat([
       { Header: 'Status', accessor: 'status' },
-      { 
+      {
         Header: 'Actions',
         Cell: d => {
           return (
             <div>
               <a className="btn btn-sm btn-secondary text-white" onClick={(e)=>{this.toggleShow(e,d)}}><FontAwesomeIcon icon="eye"/></a>
-              {!this.props.readOnly &&
+              {(!this.props.readOnly && this.props.current_user.roles.includes("edit")) &&
                 <a className="btn btn-sm btn-secondary text-white ml-1" onClick={(e)=>{this.toggleUpdate(e,d)}}><FontAwesomeIcon icon="pen"/></a>
               }
             </div>
@@ -215,8 +215,8 @@ class PersonEvents extends React.Component {
     return columns;
   }
 
-  /** 
-   * Scrolls the window to the top of the page. 
+  /**
+   * Scrolls the window to the top of the page.
    * @public
    */
   backToTop(e){
@@ -240,17 +240,19 @@ class PersonEvents extends React.Component {
     if (this.reactTable)
       this.setState({export_data: this.reactTable.getResolvedState().sortedData.map((r)=> r._original)});
   }
-     
-  /** 
+
+  /**
    * The render lifecycle method.
    * @public
    */
   render(){
-    let top_content = <a className="btn btn-secondary text-white mb-3" onClick={this.toggleAdd}><FontAwesomeIcon icon="plus"/></a>;
-    
+    let top_content = ( this.props.current_user.roles.includes("edit") &&
+      <a className="btn btn-secondary text-white mb-3" onClick={this.toggleAdd}><FontAwesomeIcon icon="plus"/> Add</a>
+    );
+
     if (this.state.adding){
-      top_content = <PersonEventForm 
-        action="create" 
+      top_content = <PersonEventForm
+        action="create"
         current_user={this.props.current_user}
         parent_model={this.props.parent_model}
         parent={this.props.parent}
@@ -258,18 +260,18 @@ class PersonEvents extends React.Component {
         handleFormToggle={this.toggleAdd}
       />
     } else if (this.state.editing){
-      top_content = <PersonEventForm 
-        action="update" 
-        person_event={this.state.selected} 
+      top_content = <PersonEventForm
+        action="update"
+        person_event={this.state.selected}
         current_user={this.props.current_user}
         parent_model={this.props.parent_model}
         parent={this.props.parent}
-        handleUpdate={this.update} 
+        handleUpdate={this.update}
         handleDelete={this.delete}
         handleFormToggle={this.toggleUpdate}
       />
     } else if (this.state.showing){
-      top_content = <PersonEvent 
+      top_content = <PersonEvent
         person_event={this.state.selected}
         current_user={this.props.current_user}
         close={this.toggleShow}
@@ -278,10 +280,10 @@ class PersonEvents extends React.Component {
 
     return (
       <div className="person_events col-md-12 p-0">
-        <a className="btn btn-secondary text-white btn-sm" id="back-to-top" onClick={this.backToTop}><FontAwesomeIcon icon="arrow-up"/></a> 
+        <a className="btn btn-secondary text-white btn-sm" id="back-to-top" onClick={this.backToTop}><FontAwesomeIcon icon="arrow-up"/></a>
         <div className="card">
           <h2 className="card-title text-center mt-3">
-            {this.props.parent && this.props.parent.name ? this.props.parent.name : null} Events Attended    
+            {this.props.parent && this.props.parent.name ? this.props.parent.name : null} Events Attended
           </h2>
 
           <h4 className="text-center">
@@ -291,8 +293,8 @@ class PersonEvents extends React.Component {
           <div className="card-body">
             {top_content}
 
-            <CSVLink 
-              data={this.state.export_data} 
+            <CSVLink
+              data={this.state.export_data}
               className="btn btn-secondary text-white mb-3 ml-1"
               filename="person_events_export.csv"
             >
@@ -321,13 +323,13 @@ class PersonEvents extends React.Component {
     );
   }
 
-  /** 
-   * The componentDidMount lifecycle method. Registers an window scroll listener that shows/hides the back-to-top button 
+  /**
+   * The componentDidMount lifecycle method. Registers an window scroll listener that shows/hides the back-to-top button
    * @public
    */
-  componentDidMount(){  
+  componentDidMount(){
     var buttonScrollThreshold = 177;
-    
+
     window.onscroll = function() {
       if (document.body.scrollTop > buttonScrollThreshold || document.documentElement.scrollTop > buttonScrollThreshold) {
         document.getElementById("back-to-top").style.display = "block";
@@ -340,11 +342,11 @@ class PersonEvents extends React.Component {
   }
 
   /**
-   * The componentWillReceiveProps lifecycle method. 
-   * Because the records stored in the state are initially set from a prop, 
-   * if the prop is updated this ensures the state is updated as well. 
-   * This will happen when this component is not the root, 
-   * but is rendered by another component to display its associated model attributes. 
+   * The componentWillReceiveProps lifecycle method.
+   * Because the records stored in the state are initially set from a prop,
+   * if the prop is updated this ensures the state is updated as well.
+   * This will happen when this component is not the root,
+   * but is rendered by another component to display its associated model attributes.
    * @public
    */
   componentWillReceiveProps(nextProps) {

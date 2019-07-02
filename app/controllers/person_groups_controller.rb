@@ -1,5 +1,6 @@
 class PersonGroupsController < ApplicationController
   before_action :set_person_group, only: [:update, :destroy]
+  before_action :check_authorization
 
   # GET /person_groups
   def index
@@ -55,5 +56,9 @@ class PersonGroupsController < ApplicationController
     # Only allow a trusted parameter "white list" through.
     def person_group_params
       params.require(:person_group).permit(:group_id, :person_id, :role, :start, :end)
+    end
+
+    def check_authorization
+      authorize PersonGroup
     end
 end

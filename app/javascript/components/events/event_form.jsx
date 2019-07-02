@@ -5,7 +5,7 @@ import DatePicker from 'react-datepicker';
 import moment from 'moment';
 import 'react-datepicker/dist/react-datepicker.css';
 
-import { WithContext as ReactTags } from 'react-tag-input';
+// import { WithContext as ReactTags } from 'react-tag-input';
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faPen, faPlus } from '@fortawesome/free-solid-svg-icons'
@@ -19,7 +19,7 @@ import EventCategoryForm from '../event_categories/event_category_form';
 class EventForm extends React.Component {
   static propTypes = {
     /** @type {string} A string to indicate if the form is being used to update or create a model instance. Must be equal to "update" or "create". */
-    action: PropTypes.string, 
+    action: PropTypes.string,
     /** @type {string} The record to edit. If creating a new instance this prop is not required and the new instance will be created using defaults returned from the defaults method. */
     event: PropTypes.object,
     /** @type {object} The attributes of the user who requested the page. */
@@ -42,9 +42,9 @@ class EventForm extends React.Component {
     event: {}
   };
 
-  /** 
-   * The constructor lifecycle method. 
-   * @param {object} props - The component's props 
+  /**
+   * The constructor lifecycle method.
+   * @param {object} props - The component's props
    * @public
    */
   constructor(props){
@@ -80,8 +80,8 @@ class EventForm extends React.Component {
 
   }
 
-  /** 
-   * A keypress event handler for all form inputs that sets the corresponding state variable using the inputs name attribute.  
+  /**
+   * A keypress event handler for all form inputs that sets the corresponding state variable using the inputs name attribute.
    * @public
    */
   handleChange(e){
@@ -97,14 +97,14 @@ class EventForm extends React.Component {
     });
   }
 
-  /** 
-   * A click event handler that sends an AJAX call to delete the record.  
+  /**
+   * A click event handler that sends an AJAX call to delete the record.
    * @public
    */
   handleDelete(e){
     if (e.isDefaultPrevented != null && e.isDefaultPrevented() == false)
       e.preventDefault();
-    
+
     fetch("/events/"+this.props.event.id, {
       method: 'DELETE',
       headers: this.headers,
@@ -113,14 +113,14 @@ class EventForm extends React.Component {
       .then(this.props.handleDelete,
         (error) => {
           this.setState({
-            error:error 
+            error:error
           });
         }
       )
   }
 
-  /** 
-   * A click event handler that sends an AJAX call to update or create the record.  
+  /**
+   * A click event handler that sends an AJAX call to update or create the record.
    * @public
    */
   handleSubmit(e){
@@ -128,7 +128,7 @@ class EventForm extends React.Component {
 
     if (e.isDefaultPrevented != null && e.isDefaultPrevented() == false)
       e.preventDefault();
-    
+
     if (action == "create"){
       fetch('/events',{
         method: 'POST',
@@ -139,7 +139,7 @@ class EventForm extends React.Component {
         .then(this.props.handleNew,
           (error) => {
             this.setState({
-              error:error 
+              error:error
             });
           }
         )
@@ -153,11 +153,11 @@ class EventForm extends React.Component {
         .then(this.props.handleUpdate,
           (error) => {
             this.setState({
-              error:error 
+              error:error
             });
           }
         )
-    } 
+    }
   }
 
   /**
@@ -213,7 +213,7 @@ class EventForm extends React.Component {
     });
   }
 
-  /** 
+  /**
    * Handler invoked by EventSearch component which sets the associated event id.
    * @param {object} event - A event object
    */
@@ -251,7 +251,7 @@ class EventForm extends React.Component {
       prevState.event.tags = newTags;
 
       return prevState;
-    }); 
+    });
   }
 
   renderEventCategorySelector(){
@@ -265,13 +265,13 @@ class EventForm extends React.Component {
             <EventCategorySearch handleResultSelected={this.handleEventCategorySelected} />
             Or create a new one <a className="btn btn-sm btn-secondary text-white" data-toggle="collapse" href="#event_category_create" role="button" aria-expanded="false" aria-controls="event_category_create"><FontAwesomeIcon icon="plus"/></a>
             <div className="collapse" id="event_category_create">
-              <EventCategoryForm 
-                handleUpdate={this.handleEventCategorySelected} 
-                action="create" 
+              <EventCategoryForm
+                handleUpdate={this.handleEventCategorySelected}
+                action="create"
                 current_user={this.props.current_user}
                 handleNew={this.handleEventCategorySelected}
                 parent_model="Event"
-              /> 
+              />
             </div>
           </div>
         }
@@ -293,7 +293,7 @@ class EventForm extends React.Component {
       button_text = "Create";
     } else if (action == "update"){
       button_text = "Update";
-    } 
+    }
 
     let title = null;
     if (action == "create"){
@@ -305,11 +305,11 @@ class EventForm extends React.Component {
     let buttons = (
       <div className="form-actions">
         <button type="button" className="btn btn-danger text-white" onClick={this.handleSubmit} disabled={!this.valid()}>{button_text}</button>
-        {action == "update" ? 
+        {action == "update" ?
           <button type="button" className="btn btn-danger text-white ml-3" onClick={this.handleDelete} disabled={!this.valid()}>Delete</button>
           : null
         }
-        <button type="button" className="btn btn-danger text-white ml-3" onClick={this.props.handleFormToggle}>Cancel</button>         
+        <button type="button" className="btn btn-danger text-white ml-3" onClick={this.props.handleFormToggle}>Cancel</button>
       </div>
     )
 
@@ -329,7 +329,7 @@ class EventForm extends React.Component {
               {event.event_category &&
                 <p className="ml-3" id="event_name">{event.event_category.name}</p>
               }
-              
+
               {this.renderEventCategorySelector()}
             </div>
 
@@ -361,7 +361,7 @@ class EventForm extends React.Component {
             </div>
 
             {buttons}
-            
+
           </div>
         </div>
       </div>

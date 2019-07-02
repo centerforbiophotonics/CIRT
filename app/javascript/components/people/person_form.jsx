@@ -8,7 +8,7 @@ import PersonEvents from '../person_events/person_events';
 class PersonForm extends React.Component {
   static propTypes = {
     /** @type {string} A string to indicate if the form is being used to update or create a model instance. Must be equal to "update" or "create". */
-    action: PropTypes.string, 
+    action: PropTypes.string,
     /** @type {string} The record to edit. If creating a new instance this prop is not required and the new instance will be created using defaults returned from the defaults method. */
     person: PropTypes.object,
     /** @type {object} The attributes of the user who requested the page. */
@@ -25,9 +25,9 @@ class PersonForm extends React.Component {
     person: {}
   };
 
-  /** 
-   * The constructor lifecycle method. 
-   * @param {object} props - The component's props 
+  /**
+   * The constructor lifecycle method.
+   * @param {object} props - The component's props
    * @public
    */
   constructor(props){
@@ -56,8 +56,8 @@ class PersonForm extends React.Component {
 
   }
 
-  /** 
-   * A keypress event handler for all form inputs that sets the corresponding state variable using the inputs name attribute.  
+  /**
+   * A keypress event handler for all form inputs that sets the corresponding state variable using the inputs name attribute.
    * @public
    */
   handleChange(e){
@@ -73,14 +73,14 @@ class PersonForm extends React.Component {
     });
   }
 
-  /** 
-   * A click event handler that sends an AJAX call to delete the record.  
+  /**
+   * A click event handler that sends an AJAX call to delete the record.
    * @public
    */
   handleDelete(e){
     if (e.isDefaultPrevented != null && e.isDefaultPrevented() == false)
       e.preventDefault();
-    
+
     if (confirm("Are you sure you want to delete this person?"))
       fetch("/people/"+this.props.person.id, {
         method: 'DELETE',
@@ -90,14 +90,14 @@ class PersonForm extends React.Component {
         .then(this.props.handleDelete,
           (error) => {
             this.setState({
-              error:error 
+              error:error
             });
           }
         );
   }
 
-  /** 
-   * A click event handler that sends an AJAX call to update or create the record.  
+  /**
+   * A click event handler that sends an AJAX call to update or create the record.
    * @public
    */
   handleSubmit(e){
@@ -105,7 +105,7 @@ class PersonForm extends React.Component {
 
     if (e.isDefaultPrevented != null && e.isDefaultPrevented() == false)
       e.preventDefault();
-    
+
     if (action == "create"){
       fetch('/people',{
         method: 'POST',
@@ -116,7 +116,7 @@ class PersonForm extends React.Component {
         .then(this.props.handleNew,
           (error) => {
             this.setState({
-              error:error 
+              error:error
             });
           }
         )
@@ -130,11 +130,11 @@ class PersonForm extends React.Component {
         .then(this.props.handleUpdate,
           (error) => {
             this.setState({
-              error:error 
+              error:error
             });
           }
         )
-    } 
+    }
   }
 
   handleIAMLookup(e){
@@ -148,14 +148,14 @@ class PersonForm extends React.Component {
       }).then(res => res.json())
         .then((res) => {
             this.setState(
-              {iam_changes_pending:true }, 
+              {iam_changes_pending:true },
               () => {this.props.handleUpdate(res)}
             );
 
           },
           (error) => {
             this.setState({
-              error:error 
+              error:error
             });
           }
         )
@@ -234,7 +234,7 @@ class PersonForm extends React.Component {
         {(action == "update" && (person.cas_user !== "" || person.email !== "")) &&
           <button type="button" className="btn btn-danger text-white ml-3" onClick={this.handleIAMLookup}>Lookup in IAM</button>
         }
-        <button type="button" className="btn btn-danger text-white ml-3" onClick={this.props.handleFormToggle}>Cancel</button>         
+        <button type="button" className="btn btn-danger text-white ml-3" onClick={this.props.handleFormToggle}>Cancel</button>
       </div>
     )
 
@@ -262,7 +262,7 @@ class PersonForm extends React.Component {
                   <input type="text" className="form-control" id="email" name="email" value={person.email} placeholder="Enter Email" onChange={this.handleChange}/>
                 </div>
               </div>
-              
+
               <div className="row justify-content-center">
                 <a className="btn btn-primary mb-1" data-toggle="collapse" href="#ids" role="button" aria-expanded="false" aria-controls="ids">
                   Toggle IDs (Edit Carefully)
@@ -342,7 +342,7 @@ class PersonForm extends React.Component {
                           person_groups={person.person_groups}
                           parent_model="Person"
                           parent={person}
-                          defaultPageSize={5}
+                          defaultPageSize={10}
                         />
                       </div>
                       <div className="tab-pane fade" id="funds" role="tabpanel" aria-labelledby="funds-tab">
@@ -350,7 +350,7 @@ class PersonForm extends React.Component {
                           person_funds={person.person_funds}
                           parent_model="Person"
                           parent={person}
-                          defaultPageSize={5}
+                          defaultPageSize={10}
                         />
                       </div>
                       <div className="tab-pane fade" id="events" role="tabpanel" aria-labelledby="funds-tab">
@@ -358,10 +358,10 @@ class PersonForm extends React.Component {
                           person_events={person.person_events}
                           parent_model="Person"
                           parent={person}
-                          defaultPageSize={5}
+                          defaultPageSize={10}
                         />
                       </div>
-                    </div>  
+                    </div>
                   </div>
                 }
 
@@ -369,7 +369,7 @@ class PersonForm extends React.Component {
             </div>
 
             {buttons}
-            
+
           </div>
         </div>
       </div>

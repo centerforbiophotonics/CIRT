@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { WithContext as ReactTags } from 'react-tag-input';
+import RoleSearch from './role_search';
 
 class RoleForm extends React.Component {
   static propTypes = {
@@ -38,15 +38,12 @@ class RoleForm extends React.Component {
     super(props);
 
     this.handleChange = this.handleChange.bind(this);
+    this.handleParentChange = this.handleParentChange.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.valid = this.valid.bind(this);
     this.defaults = this.defaults.bind(this);
     this.copy = this.copy.bind(this);
-
-    this.handleVariantDelete = this.handleVariantDelete.bind(this);
-    this.handleVariantAddition = this.handleVariantAddition.bind(this);
-    this.handleVariantDrag = this.handleVariantDrag.bind(this);
 
     this.state = {
       role: this.copy(this.props.role)
@@ -75,6 +72,15 @@ class RoleForm extends React.Component {
 
     this.setState(prevState => {
       prevState.role[name] = value;
+      return prevState;
+    });
+  }
+
+  handleParentChange(parent){
+    this.setState(prevState => {
+      prevState.role.parent_id = parent.id;
+      prevState.role.parent = parent;
+
       return prevState;
     });
   }
@@ -161,7 +167,8 @@ class RoleForm extends React.Component {
   defaults(){
     return {
       name: "",
-      variants: []
+      parent: null,
+      parent_id: null
     }
   }
 
@@ -181,33 +188,6 @@ class RoleForm extends React.Component {
     return copiedObj;
   }
 
-  handleVariantDelete(i) {
-    this.setState(prevState => {
-      prevState.role.variants = prevState.role.variants.filter((variant, index) => index !== i);
-      return prevState;
-    });
-  }
-
-  handleVariantAddition(variant) {
-    this.setState(prevState => {
-      prevState.role.variants.push(variant.text);
-      return prevState;
-    });
-  }
-
-  handleVariantDrag(variant, currPos, newPos) {
-    this.setState(prevState => {
-      const variants = [...prevState.role.variants];
-      const newVariants = variants.slice();
-
-      newVariants.splice(currPos, 1);
-      newVariants.splice(newPos, 0, variant.text);
-
-      prevState.role.variants = newVariants;
-
-      return prevState;
-    }); 
-  }
 
   /**
    * The render lifecycle method.
@@ -274,14 +254,24 @@ class RoleForm extends React.Component {
             </div>
 
             <div className="form-group">
-              <label htmlFor="variants" className="font-weight-bold">Variants</label>
-              <ReactTags
-                id="variants"
-                tags={role.variants.map(t => ({id: t, text:t}))}
-                handleDelete={this.handleVariantDelete}
-                handleAddition={this.handleVariantAddition}
-                handleDrag={this.handleVariantDrag}
-              />
+              <label htmlFor="parent_id" className="font-weight-bold">Variant Of</label>
+              <div className="ml-3">
+                <p>
+                  {this.state.role.parent !== null ?
+                    this.state.role.parent.name
+                    :
+                    "Nothing"
+                  }
+                </p>
+                <div className="ml-3">
+                  <p> To Change: </p>
+                  <RoleSearch 
+                    name="parent_id" 
+                    id="parent_id" 
+                    handleResultSelected={this.handleParentChange}
+                  />  
+                </div>
+              </div>
             </div>
 
             {buttons}

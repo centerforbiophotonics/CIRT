@@ -41,7 +41,6 @@ class Role extends React.Component {
           <div className="ml-3">
             {buttons}
             <p><strong>Name: </strong>{role.name}</p>
-              <p><strong>Variants: </strong>{role.variants}</p>
             {buttons}
           </div>
         </div>

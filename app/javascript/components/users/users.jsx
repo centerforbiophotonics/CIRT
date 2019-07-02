@@ -13,7 +13,7 @@ import UserForm from './user_form';
 import UserSearch from './user_search';
 
 /**
- * User interface for listing, filtering and exporting Users. Renders subcomponents for CRUD actions. Can be used a root component or rendered from the form or show component of an associated model. 
+ * User interface for listing, filtering and exporting Users. Renders subcomponents for CRUD actions. Can be used a root component or rendered from the form or show component of an associated model.
  */
 class Users extends React.Component {
   static propTypes = {
@@ -24,14 +24,14 @@ class Users extends React.Component {
     handleUpdate: PropTypes.func
   }
 
-  /** 
-   * The constructor lifecycle method. 
-   * @param {object} props - The component's props 
+  /**
+   * The constructor lifecycle method.
+   * @param {object} props - The component's props
    * @public
    */
   constructor(props){
     super(props);
-        
+
     this.toggleAdd = this.toggleAdd.bind(this);
     this.add = this.add.bind(this);
     this.toggleUpdate = this.toggleUpdate.bind(this);
@@ -56,14 +56,14 @@ class Users extends React.Component {
     };
   }
 
-  /** 
-   * Click handler that toggles the add menu and hides the show and edit components. 
+  /**
+   * Click handler that toggles the add menu and hides the show and edit components.
    * @public
    */
   toggleAdd(e){
     if (e.isDefaultPrevented != null && e.isDefaultPrevented() === false)
       e.preventDefault();
-    
+
     this.setState(prevState => ({
       adding: !prevState.adding,
       editing: false,
@@ -73,8 +73,8 @@ class Users extends React.Component {
     this.backToTop();
   }
 
-  /** 
-   * Handler invoked after a form succeeds in adding a new model instance to update the client state. 
+  /**
+   * Handler invoked after a form succeeds in adding a new model instance to update the client state.
    * @param {object} user - The model instance to add to the current state.
    * @public
    */
@@ -86,8 +86,8 @@ class Users extends React.Component {
     });
   }
 
-  /** 
-   * Click handler that toggles the edit menu and hides the show and add components. 
+  /**
+   * Click handler that toggles the edit menu and hides the show and add components.
    * @public
    */
   toggleUpdate(e,d){
@@ -104,8 +104,8 @@ class Users extends React.Component {
     this.backToTop();
   }
 
-  /** 
-   * Handler invoked after a form succeeds in editing a model instance to update the client state. 
+  /**
+   * Handler invoked after a form succeeds in editing a model instance to update the client state.
    * @param {object} user - The updated model instance replace in the current state.
    * @public
    */
@@ -118,8 +118,8 @@ class Users extends React.Component {
     });
   }
 
-  /** 
-   * Click handler that toggles the show component and hides the edit and add components. 
+  /**
+   * Click handler that toggles the show component and hides the edit and add components.
    * @public
    */
   toggleShow(e,d){
@@ -136,8 +136,8 @@ class Users extends React.Component {
     this.backToTop();
   }
 
-  /** 
-   * Handler invoked after a form succeeds in deleting a model instance to update the client state. 
+  /**
+   * Handler invoked after a form succeeds in deleting a model instance to update the client state.
    * @param {object} user - The deleted model instance remove from the current state.
    * @public
    */
@@ -160,8 +160,18 @@ class Users extends React.Component {
       { Header: 'Name', accessor: 'name' },
       { Header: 'Email', accessor: 'email' },
       { Header: 'Cas User', accessor: 'cas_user' },
-      { Header: 'Roles', accessor: 'roles' },
-      { 
+      {
+        Header: 'Roles',
+        accessor: 'roles',
+        Cell: d => {
+          return (
+            <div>
+              {d.value.join(", ")}
+            </div>
+          )
+        }
+      },
+      {
         Header: 'Actions',
         Cell: d => {
           return (
@@ -179,8 +189,8 @@ class Users extends React.Component {
     ];
   }
 
-  /** 
-   * Scrolls the window to the top of the page. 
+  /**
+   * Scrolls the window to the top of the page.
    * @public
    */
   backToTop(e){
@@ -195,32 +205,34 @@ class Users extends React.Component {
   copy(obj){
     return JSON.parse(JSON.stringify(obj));
   }
-     
-  /** 
+
+  /**
    * The render lifecycle method.
    * @public
    */
   render(){
     let top_content = <a className="btn btn-secondary text-white mb-3" onClick={this.toggleAdd}><FontAwesomeIcon icon="plus"/></a>;
-    
+
     if (this.state.adding){
-      top_content = <UserForm 
-        action="create" 
+      top_content = <UserForm
+        action="create"
         current_user={this.props.current_user}
+        role_list={this.props.role_list}
         handleNew={this.add}
         handleFormToggle={this.toggleAdd}
       />
     } else if (this.state.editing){
-      top_content = <UserForm 
-        action="update" 
-        user={this.state.selected} 
+      top_content = <UserForm
+        action="update"
+        user={this.state.selected}
         current_user={this.props.current_user}
-        handleUpdate={this.update} 
+        role_list={this.props.role_list}
+        handleUpdate={this.update}
         handleDelete={this.delete}
         handleFormToggle={this.toggleUpdate}
       />
     } else if (this.state.showing){
-      top_content = <User 
+      top_content = <User
         user={this.state.selected}
         current_user={this.props.current_user}
         close={this.toggleShow}
@@ -229,10 +241,10 @@ class Users extends React.Component {
 
     return (
       <div className="users">
-        <a className="btn btn-secondary text-white btn-sm" id="back-to-top" onClick={this.backToTop}><FontAwesomeIcon icon="arrow-up"/></a> 
+        <a className="btn btn-secondary text-white btn-sm" id="back-to-top" onClick={this.backToTop}><FontAwesomeIcon icon="arrow-up"/></a>
         <div className="card">
           <h2 className="card-title text-center">
-            Users     
+            Users
           </h2>
 
           <div className="card-body">
@@ -251,13 +263,13 @@ class Users extends React.Component {
     );
   }
 
-  /** 
-   * The componentDidMount lifecycle method. Registers an window scroll listener that shows/hides the back-to-top button 
+  /**
+   * The componentDidMount lifecycle method. Registers an window scroll listener that shows/hides the back-to-top button
    * @public
    */
-  componentDidMount(){  
+  componentDidMount(){
     var buttonScrollThreshold = 177;
-    
+
     window.onscroll = function() {
       if (document.body.scrollTop > buttonScrollThreshold || document.documentElement.scrollTop > buttonScrollThreshold) {
         document.getElementById("back-to-top").style.display = "block";
@@ -268,11 +280,11 @@ class Users extends React.Component {
   }
 
   /**
-   * The componentWillReceiveProps lifecycle method. 
-   * Because the records stored in the state are initially set from a prop, 
-   * if the prop is updated this ensures the state is updated as well. 
-   * This will happen when this component is not the root, 
-   * but is rendered by another component to display its associated model attributes. 
+   * The componentWillReceiveProps lifecycle method.
+   * Because the records stored in the state are initially set from a prop,
+   * if the prop is updated this ensures the state is updated as well.
+   * This will happen when this component is not the root,
+   * but is rendered by another component to display its associated model attributes.
    * @public
    */
   componentWillReceiveProps(nextProps) {

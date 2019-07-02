@@ -1,5 +1,6 @@
 class EventCategoriesController < ApplicationController
   before_action :set_event_category, only: [:update, :destroy]
+  before_action :check_authorization
 
   # GET /event_categories
   def index
@@ -53,5 +54,9 @@ class EventCategoriesController < ApplicationController
     # Only allow a trusted parameter "white list" through.
     def event_category_params
       params.require(:event_category).permit(:name, :description)
+    end
+
+    def check_authorization
+      authorize EventCategory
     end
 end

@@ -11,8 +11,8 @@ module CIRT
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 5.2
 
-    config.rubycas.cas_base_url = "https://ssodev.ucdavis.edu/cas/"
-    config.rubycas.cas_service_url = "https://localhost:3000/"
+    config.rubycas.cas_base_url = ENV['CAS_BASE_URL']
+    config.rubycas.service_url = ENV['CIRT_CAS_SERVICE_URL']
 
     config.autoload_paths += %W(#{config.root}/lib)
 

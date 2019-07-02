@@ -6,6 +6,8 @@ import { faTimes } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 library.add( faTimes )
 
+import PersonGroups from '../person_groups/person_groups';
+
 
 /**
  * Bootstrap card showing all the details of a group and its associated models.
@@ -20,16 +22,16 @@ class Group extends React.Component {
     close: PropTypes.func,
   }
 
-  /** 
-   * The constructor lifecycle method. 
-   * @param {object} props - The component's props 
+  /**
+   * The constructor lifecycle method.
+   * @param {object} props - The component's props
    * @public
    */
   constructor(props){
     super(props);
   }
 
-  /** 
+  /**
    * The render lifecycle method.
    * @public
    */
@@ -48,14 +50,25 @@ class Group extends React.Component {
           <h3 className="card-title">{group.name}</h3>
           <div className="ml-3">
             {buttons}
+            {console.log(group)}
             <p><strong>Name: </strong>{group.name}</p>
               <p><strong>Description: </strong>{group.description}</p>
-              <p><strong>Group Category: </strong>{group.group_category_id}</p>
+              <p>
+                <strong>Group Category: </strong>
+                {group.group_category == undefined ? "None" : group.group_category.name}
+              </p>
+              <PersonGroups
+                person_groups={group.person_groups}
+                parent_model="Group"
+                parent={group}
+                defaultPageSize={5}
+                readOnly={true}
+              />
             {buttons}
           </div>
         </div>
       </div>
-    )   
+    )
   }
 }
 

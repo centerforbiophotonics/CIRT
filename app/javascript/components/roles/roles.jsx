@@ -14,7 +14,7 @@ import RoleForm from './role_form';
 import RoleMerger from './role_merger';
 
 /**
- * User interface for listing, filtering and exporting Roles. Renders subcomponents for CRUD actions. Can be used a root component or rendered from the form or show component of an associated model. 
+ * User interface for listing, filtering and exporting Roles. Renders subcomponents for CRUD actions. Can be used a root component or rendered from the form or show component of an associated model.
  */
 class Roles extends React.Component {
   static propTypes = {
@@ -36,15 +36,15 @@ class Roles extends React.Component {
     defaultPageSize: 100
   };
 
-  /** 
-   * The constructor lifecycle method. 
-   * @param {object} props - The component's props 
+  /**
+   * The constructor lifecycle method.
+   * @param {object} props - The component's props
    * @public
    */
   constructor(props){
     super(props);
 
-    this.toggleMerging = this.toggleMerging.bind(this); 
+    this.toggleMerging = this.toggleMerging.bind(this);
     this.toggleAdd = this.toggleAdd.bind(this);
     this.add = this.add.bind(this);
     this.toggleUpdate = this.toggleUpdate.bind(this);
@@ -78,14 +78,14 @@ class Roles extends React.Component {
     };
   }
 
-  /** 
-   * Click handler that toggles the add menu and hides the show and edit components. 
+  /**
+   * Click handler that toggles the add menu and hides the show and edit components.
    * @public
    */
   toggleMerging(e){
     if (e.isDefaultPrevented != null && e.isDefaultPrevented() === false)
       e.preventDefault();
-    
+
     this.setState(prevState => ({
       merging: !prevState.merging,
       adding: false,
@@ -98,14 +98,14 @@ class Roles extends React.Component {
 
   merge
 
-  /** 
-   * Click handler that toggles the add menu and hides the show and edit components. 
+  /**
+   * Click handler that toggles the add menu and hides the show and edit components.
    * @public
    */
   toggleAdd(e){
     if (e.isDefaultPrevented != null && e.isDefaultPrevented() === false)
       e.preventDefault();
-    
+
     this.setState(prevState => ({
       merging: false,
       adding: !prevState.adding,
@@ -116,8 +116,8 @@ class Roles extends React.Component {
     this.backToTop();
   }
 
-  /** 
-   * Handler invoked after a form succeeds in adding a new model instance to update the client state. 
+  /**
+   * Handler invoked after a form succeeds in adding a new model instance to update the client state.
    * @param {object} role - The model instance to add to the current state.
    * @public
    */
@@ -135,8 +135,8 @@ class Roles extends React.Component {
     });
   }
 
-  /** 
-   * Click handler that toggles the edit menu and hides the show and add components. 
+  /**
+   * Click handler that toggles the edit menu and hides the show and add components.
    * @public
    */
   toggleUpdate(e,d){
@@ -154,15 +154,15 @@ class Roles extends React.Component {
     this.backToTop();
   }
 
-  /** 
-   * Handler invoked after a form succeeds in editing a model instance to update the client state. 
+  /**
+   * Handler invoked after a form succeeds in editing a model instance to update the client state.
    * @param {object} role - The updated model instance replace in the current state.
    * @public
    */
   update(role){
     this.setState(function(prevState, props){
       prevState.roles[role.id] = role;
- 
+
       prevState.status_message = "role"+role.id+" updated.";
       prevState.status_message_type = "success";
 
@@ -170,8 +170,8 @@ class Roles extends React.Component {
     });
   }
 
-  /** 
-   * Click handler that toggles the show component and hides the edit and add components. 
+  /**
+   * Click handler that toggles the show component and hides the edit and add components.
    * @public
    */
   toggleShow(e,d){
@@ -188,8 +188,8 @@ class Roles extends React.Component {
     this.backToTop();
   }
 
-  /** 
-   * Handler invoked after a form succeeds in deleting a model instance to update the client state. 
+  /**
+   * Handler invoked after a form succeeds in deleting a model instance to update the client state.
    * @param {object} role - The deleted model instance remove from the current state.
    * @public
    */
@@ -214,7 +214,7 @@ class Roles extends React.Component {
   columnDefs(){
     return [
       { Header: 'Name', accessor: 'name' },
-      { Header: 'Children / Variants', accessor: 'children', 
+      { Header: 'Children / Variants', accessor: 'children',
         Cell: d => {
           if (d.value == undefined){
             return null
@@ -223,16 +223,18 @@ class Roles extends React.Component {
               d.value.map(r => (r.name)).join(", ")
             )
           }
-          
-        } 
+
+        }
       },
-      { 
+      {
         Header: 'Actions',
         Cell: d => {
           return (
             <div>
               <a className="btn btn-sm btn-secondary text-white" onClick={(e)=>{this.toggleShow(e,d)}}><FontAwesomeIcon icon="eye"/></a>
-              <a className="btn btn-sm btn-secondary text-white ml-1" onClick={(e)=>{this.toggleUpdate(e,d)}}><FontAwesomeIcon icon="pen"/></a>
+              { this.props.current_user.roles.includes("edit") &&
+                <a className="btn btn-sm btn-secondary text-white ml-1" onClick={(e)=>{this.toggleUpdate(e,d)}}><FontAwesomeIcon icon="pen"/></a>
+              }
             </div>
           )
         },
@@ -245,8 +247,8 @@ class Roles extends React.Component {
     ];
   }
 
-  /** 
-   * Scrolls the window to the top of the page. 
+  /**
+   * Scrolls the window to the top of the page.
    * @public
    */
   backToTop(e){
@@ -270,51 +272,53 @@ class Roles extends React.Component {
     if (this.reactTable)
       this.setState({export_data: this.reactTable.getResolvedState().sortedData.map((r)=> r._original)});
   }
-     
-  /** 
+
+  /**
    * The render lifecycle method.
    * @public
    */
   render(){
-    let top_content = <div className="float-left">
-      <a className="btn btn-secondary text-white mb-3" onClick={this.toggleAdd}>
-        <FontAwesomeIcon icon="plus"/>
-      </a>
-      <a 
-        className="btn btn-secondary text-white mb-3 ml-1" 
-        onClick={this.toggleMerging}
-        title="Consolidate Roles"
-      >
-        <FontAwesomeIcon icon="broom"/>
-      </a>
-    </div>;
-    
+    let top_content = ( this.props.current_user.roles.includes("edit") &&
+      <div className="float-left">
+        <a className="btn btn-secondary text-white mb-3" onClick={this.toggleAdd}>
+          <FontAwesomeIcon icon="plus"/>
+        </a>
+        <a
+          className="btn btn-secondary text-white mb-3 ml-1"
+          onClick={this.toggleMerging}
+          title="Consolidate Roles"
+        >
+          <FontAwesomeIcon icon="broom"/>
+        </a>
+      </div>
+    );
+
     if (this.state.adding){
-      top_content = <RoleForm 
-        action="create" 
+      top_content = <RoleForm
+        action="create"
         current_user={this.props.current_user}
         parent_model={this.props.parent_model}
         handleNew={this.add}
         handleFormToggle={this.toggleAdd}
       />
     } else if (this.state.editing){
-      top_content = <RoleForm 
-        action="update" 
-        role={this.state.selected} 
+      top_content = <RoleForm
+        action="update"
+        role={this.state.selected}
         current_user={this.props.current_user}
         parent_model={this.props.parent_model}
-        handleUpdate={this.update} 
+        handleUpdate={this.update}
         handleDelete={this.delete}
         handleFormToggle={this.toggleUpdate}
       />
     } else if (this.state.showing){
-      top_content = <Role 
+      top_content = <Role
         role={this.state.selected}
         current_user={this.props.current_user}
         close={this.toggleShow}
       />
     } else if (this.state.merging){
-      top_content = <RoleMerger 
+      top_content = <RoleMerger
         roles={this.state.roles}
         close={this.toggleMerging}
         update={this.update}
@@ -323,10 +327,10 @@ class Roles extends React.Component {
 
     return (
       <div className="roles col-md-12">
-        <a className="btn btn-secondary text-white btn-sm" id="back-to-top" onClick={this.backToTop}><FontAwesomeIcon icon="arrow-up"/></a> 
+        <a className="btn btn-secondary text-white btn-sm" id="back-to-top" onClick={this.backToTop}><FontAwesomeIcon icon="arrow-up"/></a>
         <div className="card">
           <h2 className="card-title text-center">
-            Roles     
+            Roles
           </h2>
 
           {this.state.status_message != "" &&
@@ -340,8 +344,8 @@ class Roles extends React.Component {
           <div className="card-body">
             {top_content}
 
-            <CSVLink 
-              data={this.state.export_data} 
+            <CSVLink
+              data={this.state.export_data}
               className="btn btn-secondary text-white mb-3 ml-1"
               filename="roles_export.csv"
             >
@@ -363,13 +367,13 @@ class Roles extends React.Component {
     );
   }
 
-  /** 
-   * The componentDidMount lifecycle method. Registers an window scroll listener that shows/hides the back-to-top button 
+  /**
+   * The componentDidMount lifecycle method. Registers an window scroll listener that shows/hides the back-to-top button
    * @public
    */
-  componentDidMount(){  
+  componentDidMount(){
     var buttonScrollThreshold = 177;
-    
+
     window.onscroll = function() {
       if (document.body.scrollTop > buttonScrollThreshold || document.documentElement.scrollTop > buttonScrollThreshold) {
         document.getElementById("back-to-top").style.display = "block";
@@ -382,11 +386,11 @@ class Roles extends React.Component {
   }
 
   /**
-   * The componentWillReceiveProps lifecycle method. 
-   * Because the records stored in the state are initially set from a prop, 
-   * if the prop is updated this ensures the state is updated as well. 
-   * This will happen when this component is not the root, 
-   * but is rendered by another component to display its associated model attributes. 
+   * The componentWillReceiveProps lifecycle method.
+   * Because the records stored in the state are initially set from a prop,
+   * if the prop is updated this ensures the state is updated as well.
+   * This will happen when this component is not the root,
+   * but is rendered by another component to display its associated model attributes.
    * @public
    */
   componentWillReceiveProps(nextProps) {

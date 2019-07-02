@@ -1,0 +1,13 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  date: 2019-04-29
+  course: MyString
+  term_code: MyString
+  number_of_scantrons: 1
+
+two:
+  date: 2019-04-29
+  course: MyString
+  term_code: MyString
+  number_of_scantrons: 1

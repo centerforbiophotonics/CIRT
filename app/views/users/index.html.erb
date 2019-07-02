@@ -1,1 +1,8 @@
-<%= react_component 'Users', { users: @users, current_user: current_user} %>
+<%= react_component(
+    'Users',
+    {
+      users: @users,
+      current_user: current_user,
+      role_list: User.role_list
+    }
+) %>

@@ -13,7 +13,7 @@ import Fund from './fund';
 import FundForm from './fund_form';
 
 /**
- * User interface for listing, filtering and exporting Funds. Renders subcomponents for CRUD actions. Can be used a root component or rendered from the form or show component of an associated model. 
+ * User interface for listing, filtering and exporting Funds. Renders subcomponents for CRUD actions. Can be used a root component or rendered from the form or show component of an associated model.
  */
 class Funds extends React.Component {
   static propTypes = {
@@ -32,17 +32,17 @@ class Funds extends React.Component {
   };
 
   static defaultProps = {
-    defaultPageSize: 100
+    defaultPageSize: 20
   };
 
-  /** 
-   * The constructor lifecycle method. 
-   * @param {object} props - The component's props 
+  /**
+   * The constructor lifecycle method.
+   * @param {object} props - The component's props
    * @public
    */
   constructor(props){
     super(props);
-        
+
     this.toggleAdd = this.toggleAdd.bind(this);
     this.add = this.add.bind(this);
     this.toggleUpdate = this.toggleUpdate.bind(this);
@@ -70,14 +70,14 @@ class Funds extends React.Component {
     };
   }
 
-  /** 
-   * Click handler that toggles the add menu and hides the show and edit components. 
+  /**
+   * Click handler that toggles the add menu and hides the show and edit components.
    * @public
    */
   toggleAdd(e){
     if (e.isDefaultPrevented != null && e.isDefaultPrevented() === false)
       e.preventDefault();
-    
+
     this.setState(prevState => ({
       adding: !prevState.adding,
       editing: false,
@@ -87,8 +87,8 @@ class Funds extends React.Component {
     this.backToTop();
   }
 
-  /** 
-   * Handler invoked after a form succeeds in adding a new model instance to update the client state. 
+  /**
+   * Handler invoked after a form succeeds in adding a new model instance to update the client state.
    * @param {object} fund - The model instance to add to the current state.
    * @public
    */
@@ -100,8 +100,8 @@ class Funds extends React.Component {
     });
   }
 
-  /** 
-   * Click handler that toggles the edit menu and hides the show and add components. 
+  /**
+   * Click handler that toggles the edit menu and hides the show and add components.
    * @public
    */
   toggleUpdate(e,d){
@@ -118,8 +118,8 @@ class Funds extends React.Component {
     this.backToTop();
   }
 
-  /** 
-   * Handler invoked after a form succeeds in editing a model instance to update the client state. 
+  /**
+   * Handler invoked after a form succeeds in editing a model instance to update the client state.
    * @param {object} fund - The updated model instance replace in the current state.
    * @public
    */
@@ -132,8 +132,8 @@ class Funds extends React.Component {
     });
   }
 
-  /** 
-   * Click handler that toggles the show component and hides the edit and add components. 
+  /**
+   * Click handler that toggles the show component and hides the edit and add components.
    * @public
    */
   toggleShow(e,d){
@@ -150,8 +150,8 @@ class Funds extends React.Component {
     this.backToTop();
   }
 
-  /** 
-   * Handler invoked after a form succeeds in deleting a model instance to update the client state. 
+  /**
+   * Handler invoked after a form succeeds in deleting a model instance to update the client state.
    * @param {object} fund - The deleted model instance remove from the current state.
    * @public
    */
@@ -178,13 +178,15 @@ class Funds extends React.Component {
       { Header: 'Date', accessor: 'date' },
       { Header: 'External', accessor: 'external' },
       { Header: 'Source', accessor: 'source' },
-      { 
+      {
         Header: 'Actions',
         Cell: d => {
           return (
             <div>
               <a className="btn btn-sm btn-secondary text-white" onClick={(e)=>{this.toggleShow(e,d)}}><FontAwesomeIcon icon="eye"/></a>
-              <a className="btn btn-sm btn-secondary text-white ml-1" onClick={(e)=>{this.toggleUpdate(e,d)}}><FontAwesomeIcon icon="pen"/></a>
+              { this.props.current_user.roles.includes("edit") &&
+                <a className="btn btn-sm btn-secondary text-white ml-1" onClick={(e)=>{this.toggleUpdate(e,d)}}><FontAwesomeIcon icon="pen"/></a>
+              }
             </div>
           )
         },
@@ -196,8 +198,8 @@ class Funds extends React.Component {
     ];
   }
 
-  /** 
-   * Scrolls the window to the top of the page. 
+  /**
+   * Scrolls the window to the top of the page.
    * @public
    */
   backToTop(e){
@@ -221,32 +223,34 @@ class Funds extends React.Component {
     if (this.reactTable)
       this.setState({export_data: this.reactTable.getResolvedState().sortedData.map((r)=> r._original)});
   }
-     
-  /** 
+
+  /**
    * The render lifecycle method.
    * @public
    */
   render(){
-    let top_content = <a className="btn btn-secondary text-white mb-3" onClick={this.toggleAdd}><FontAwesomeIcon icon="plus"/></a>;
-    
+    let top_content = ( this.props.current_user.roles.includes("edit") &&
+      <a className="btn btn-secondary text-white mb-3" onClick={this.toggleAdd}><FontAwesomeIcon icon="plus"/> Add</a>
+    );
+
     if (this.state.adding){
-      top_content = <FundForm 
-        action="create" 
+      top_content = <FundForm
+        action="create"
         current_user={this.props.current_user}
         handleNew={this.add}
         handleFormToggle={this.toggleAdd}
       />
     } else if (this.state.editing){
-      top_content = <FundForm 
-        action="update" 
-        fund={this.state.selected} 
+      top_content = <FundForm
+        action="update"
+        fund={this.state.selected}
         current_user={this.props.current_user}
-        handleUpdate={this.update} 
+        handleUpdate={this.update}
         handleDelete={this.delete}
         handleFormToggle={this.toggleUpdate}
       />
     } else if (this.state.showing){
-      top_content = <Fund 
+      top_content = <Fund
         fund={this.state.selected}
         current_user={this.props.current_user}
         close={this.toggleShow}
@@ -255,10 +259,10 @@ class Funds extends React.Component {
 
     return (
       <div className="funds col-md-12 p-0">
-        <a className="btn btn-secondary text-white btn-sm" id="back-to-top" onClick={this.backToTop}><FontAwesomeIcon icon="arrow-up"/></a> 
+        <a className="btn btn-secondary text-white btn-sm" id="back-to-top" onClick={this.backToTop}><FontAwesomeIcon icon="arrow-up"/></a>
         <div className="card">
           <h2 className="card-title text-center mt-3">
-            Funds     
+            Funds
           </h2>
 
           <h4 className="text-center">
@@ -268,8 +272,8 @@ class Funds extends React.Component {
           <div className="card-body">
             {top_content}
 
-            <CSVLink 
-              data={this.state.export_data} 
+            <CSVLink
+              data={this.state.export_data}
               className="btn btn-secondary text-white mb-3 ml-1"
               filename="CIRT_funds_export.csv"
             >
@@ -278,7 +282,6 @@ class Funds extends React.Component {
 
             <ReactTable
               data={Object.values(this.state.funds)}
-              minRows={1}
               columns={this.columnDefs()}
               filterable
               defaultPageSize={this.props.defaultPageSize}
@@ -292,13 +295,13 @@ class Funds extends React.Component {
     );
   }
 
-  /** 
-   * The componentDidMount lifecycle method. Registers an window scroll listener that shows/hides the back-to-top button 
+  /**
+   * The componentDidMount lifecycle method. Registers an window scroll listener that shows/hides the back-to-top button
    * @public
    */
-  componentDidMount(){  
+  componentDidMount(){
     var buttonScrollThreshold = 177;
-    
+
     window.onscroll = function() {
       if (document.body.scrollTop > buttonScrollThreshold || document.documentElement.scrollTop > buttonScrollThreshold) {
         document.getElementById("back-to-top").style.display = "block";
@@ -311,11 +314,11 @@ class Funds extends React.Component {
   }
 
   /**
-   * The componentWillReceiveProps lifecycle method. 
-   * Because the records stored in the state are initially set from a prop, 
-   * if the prop is updated this ensures the state is updated as well. 
-   * This will happen when this component is not the root, 
-   * but is rendered by another component to display its associated model attributes. 
+   * The componentWillReceiveProps lifecycle method.
+   * Because the records stored in the state are initially set from a prop,
+   * if the prop is updated this ensures the state is updated as well.
+   * This will happen when this component is not the root,
+   * but is rendered by another component to display its associated model attributes.
    * @public
    */
   componentWillReceiveProps(nextProps) {
